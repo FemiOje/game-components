@@ -102,12 +102,16 @@ fi
 # Token Parameters
 TOKEN_NAME="${TOKEN_NAME:-TestGameToken}"
 TOKEN_SYMBOL="${TOKEN_SYMBOL:-TGT}"
-TOKEN_BASE_URI="${TOKEN_BASE_URI:-https://api.game.com/token/}"
+if [ -z "${TOKEN_BASE_URI+x}" ]; then
+    TOKEN_BASE_URI="https://api.game.com/token/"
+fi
 
 # Registry Parameters
 REGISTRY_NAME="${REGISTRY_NAME:-TestGameRegistry}"
 REGISTRY_SYMBOL="${REGISTRY_SYMBOL:-TGR}"
-REGISTRY_BASE_URI="${REGISTRY_BASE_URI:-https://api.game.com/registry/}"
+if [ -z "${REGISTRY_BASE_URI+x}" ]; then
+    REGISTRY_BASE_URI="https://api.game.com/registry/"
+fi
 
 # Optional addresses (can be set via environment variables)
 GAME_ADDRESS="${GAME_ADDRESS:-}"

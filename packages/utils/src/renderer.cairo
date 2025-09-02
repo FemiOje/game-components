@@ -146,7 +146,7 @@ pub fn create_custom_metadata(
     let _minted_at = format!("{}", token_metadata.minted_at);
     let _start = format!("{}", token_metadata.lifecycle.start);
     let _end = format!("{}", token_metadata.lifecycle.end);
-    let _expired = get_block_timestamp() > token_metadata.lifecycle.end;
+    let _expired = if token_metadata.lifecycle.end > 0 { get_block_timestamp() >= token_metadata.lifecycle.end } else { false };
     let _settings_id = format!("{}", token_metadata.settings_id);
     let address_as_felt: felt252 = minted_by.into();
     let _minted_by = format!("0x{:x}", address_as_felt);
