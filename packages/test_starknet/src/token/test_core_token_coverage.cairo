@@ -428,7 +428,7 @@ fn test_set_token_metadata_invalid_caller_should_panic() {
     cheat_caller_address(
         test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1),
     );
-    
+
     let token_id = test_contracts
         .test_token
         .mint(
@@ -449,7 +449,7 @@ fn test_set_token_metadata_invalid_caller_should_panic() {
     cheat_caller_address(
         test_contracts.test_token.contract_address, BOB(), CheatSpan::TargetCalls(1),
     );
-    
+
     // This should panic because BOB is not the minter of the token
     test_contracts
         .test_token
@@ -472,7 +472,7 @@ fn test_mint_with_zero_game_address_should_panic() {
 
     // Try to mint with zero game address - this should trigger validation
     let zero_address = contract_address_const::<0>();
-    
+
     test_contracts
         .test_token
         .mint(

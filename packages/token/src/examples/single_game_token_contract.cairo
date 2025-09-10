@@ -181,11 +181,27 @@ pub mod SingleGameTokenContract {
                     .renderer_address(token_id.try_into().unwrap());
 
                 let score_selector = selector!("score");
+                let token_name_selector = selector!("token_name");
                 let token_description_selector = selector!("token_description");
                 let details_svg_selector = selector!("game_details_svg");
                 let details_selector = selector!("game_details");
                 let mut calldata = array![];
                 calldata.append(token_id.low.into());
+
+                // For single-game tokens, we need to get game metadata from the game contract
+                // In production, you'd get these from the game contract or store them
+                let game_metadata = GameMetadata {
+                    contract_address: game_address,
+                    name: "Game",
+                    description: "A sample game",
+                    developer: "Developer",
+                    publisher: "Publisher",
+                    genre: "Strategy",
+                    image: "https://example.com/image.png",
+                    color: "#ffffff",
+                    client_url: "https://example.com/game",
+                    renderer_address: renderer_address,
+                };
 
                 let score =
                     match call_contract_syscall(game_address, score_selector, calldata.span()) {
@@ -197,6 +213,21 @@ pub mod SingleGameTokenContract {
                         }
                     },
                     Result::Err(_) => 0,
+                };
+
+                let token_name =
+                    match call_contract_syscall(
+                        renderer_address, token_name_selector, calldata.span(),
+                    ) {
+                    Result::Ok(result) => {
+                        // Try to deserialize the result as ByteArray
+                        let mut result_span = result;
+                        match Serde::<ByteArray>::deserialize(ref result_span) {
+                            Option::Some(token_name) => token_name,
+                            Option::None => game_metadata.name.clone(),
+                        }
+                    },
+                    Result::Err(_) => game_metadata.name.clone(),
                 };
 
                 let token_description =
@@ -244,21 +275,6 @@ pub mod SingleGameTokenContract {
                 let _state = 0; // Unused for now, but may be needed for future game state tracking
                 let player_name = self.core_token.player_name(token_id.try_into().unwrap());
 
-                // For single-game tokens, we need to get game metadata from the game contract
-                // In production, you'd get these from the game contract or store them
-                let game_metadata = GameMetadata {
-                    contract_address: game_address,
-                    name: "Game",
-                    description: "A sample game",
-                    developer: "Developer",
-                    publisher: "Publisher",
-                    genre: "Strategy",
-                    image: "https://example.com/image.png",
-                    color: "#ffffff",
-                    client_url: "https://example.com/game",
-                    renderer_address: renderer_address,
-                };
-
                 // Default settings details - empty
                 let settings_details = GameSettingDetails {
                     name: "", description: "", settings: [].span(),
@@ -274,6 +290,7 @@ pub mod SingleGameTokenContract {
 
                 create_custom_metadata(
                     token_id.try_into().unwrap(),
+                    token_name,
                     token_description,
                     game_metadata,
                     game_details_svg,

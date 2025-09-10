@@ -1,8 +1,8 @@
 use game_components_minigame::extensions::settings::interface::{
     IMinigameSettings, IMinigameSettingsDispatcher, IMinigameSettingsDispatcherTrait,
-    IMinigameSettingsDetails, IMinigameSettingsDetailsDispatcher, IMinigameSettingsDetailsDispatcherTrait,
-    IMinigameSettingsSVG, IMinigameSettingsSVGDispatcher, IMinigameSettingsSVGDispatcherTrait,
-    IMINIGAME_SETTINGS_ID,
+    IMinigameSettingsDetails, IMinigameSettingsDetailsDispatcher,
+    IMinigameSettingsDetailsDispatcherTrait, IMinigameSettingsSVG, IMinigameSettingsSVGDispatcher,
+    IMinigameSettingsSVGDispatcherTrait, IMINIGAME_SETTINGS_ID,
 };
 use game_components_minigame::extensions::settings::structs::{GameSettingDetails, GameSetting};
 use openzeppelin_introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
@@ -146,8 +146,7 @@ fn test_create_settings_50_items() {
         // Use simpler strings to avoid data size limits
         let mut name_bytes = "s";
         let mut value_bytes = "v";
-        settings_items
-            .append(GameSetting { name: name_bytes, value: value_bytes });
+        settings_items.append(GameSetting { name: name_bytes, value: value_bytes });
         i += 1;
     };
 

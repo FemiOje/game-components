@@ -395,7 +395,7 @@ fn test_mint_with_start_greater_than_end() { // UT-MINT-R006
 }
 
 #[test]
-#[should_panic(expected: "MinigameToken: Game address does not support IMinigame interface")]
+#[should_panic(expected: "MinigameToken: Game does not support IMinigame interface")]
 fn test_mint_when_game_registry_lookup_fails() { // UT-MINT-R007
     let test_contracts = setup_multi_game();
 
@@ -483,34 +483,34 @@ fn test_mint_with_maximum_objectives() { // UT-MINT-B003
         test_contracts.mock_minigame.create_objective_score(i);
         i += 1;
     };
-
     // // Create array with 100 objective IDs
-    // let mut objectives = array![];
-    // let mut j: u32 = 1;
-    // while j <= 100 {
-    //     objectives.append(j);
-    //     j += 1;
-    // };
+// let mut objectives = array![];
+// let mut j: u32 = 1;
+// while j <= 100 {
+//     objectives.append(j);
+//     j += 1;
+// };
 
     // let token_id = test_contracts
-    //     .test_token
-    //     .mint(
-    //         Option::Some(test_contracts.minigame.contract_address),
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::Some(objectives.span()),
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         ALICE(),
-    //         false,
-    //     );
+//     .test_token
+//     .mint(
+//         Option::Some(test_contracts.minigame.contract_address),
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::Some(objectives.span()),
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         ALICE(),
+//         false,
+//     );
 
     // assert!(
-    //     test_contracts.test_token.objectives_count(token_id) == 100, "Should have 100 objectives",
-    // );
+//     test_contracts.test_token.objectives_count(token_id) == 100, "Should have 100
+//     objectives",
+// );
 }
 
 #[test]
@@ -583,7 +583,8 @@ fn test_sequential_mints_increment_counter() { // UT-MINT-B004
 #[test]
 fn test_update_game_with_state_changes() { // UT-UPDATE-001
     let test_contracts = setup_multi_game();
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -613,7 +614,8 @@ fn test_update_game_with_state_changes() { // UT-UPDATE-001
 fn test_update_game_without_state_changes() { // UT-UPDATE-002
     let test_contracts = setup_multi_game();
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -674,7 +676,8 @@ fn test_update_game_with_objectives_completion() { // UT-UPDATE-003
 #[test]
 fn test_update_game_with_game_over_transition() { // UT-UPDATE-004
     let test_contracts = setup_multi_game();
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -748,7 +751,8 @@ fn test_update_game_with_blank_token() {
 fn test_game_over_false_to_true_transition() { // UT-UPDATE-S001
     let test_contracts = setup_multi_game();
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -818,7 +822,8 @@ fn test_objectives_completion_progression() { // UT-UPDATE-S002
 fn test_idempotent_updates() { // UT-UPDATE-S003
     let test_contracts = setup_multi_game();
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -1465,7 +1470,7 @@ fn test_set_token_metadata_basic() {
     let updated_metadata = test_contracts.test_token.token_metadata(token_id);
     assert!(updated_metadata.game_id == 1, "Game ID should be set");
     assert!(
-        test_contracts.test_token.player_name(token_id) == '', "Player name should be set",
+        test_contracts.test_token.player_name(token_id) == 'Player1', "Player name should be set",
     );
 }
 

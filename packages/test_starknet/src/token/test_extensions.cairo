@@ -9,7 +9,7 @@ use game_components_minigame::extensions::settings::interface::{IMinigameSetting
 // Import setup helpers
 use super::setup::{
     deploy_optimized_token_custom_metadata, deploy_mock_settings_contract,
-    deploy_token_with_settings, ALICE,
+    deploy_token_with_settings, ALICE, BOB,
 };
 
 // ================================================================================================
@@ -57,22 +57,21 @@ fn test_mint_soulbound_token() {
     let (token_dispatcher, _, _, _) = deploy_optimized_token_custom_metadata(
         "SoulboundTest", "SBT", "",
     );
-
     // // Mint soulbound token
-    // let token_id = token_dispatcher
-    //     .mint(
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         Option::None,
-    //         ALICE(),
-    //         true // soulbound
-    //     );
+// let token_id = token_dispatcher
+//     .mint(
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         Option::None,
+//         ALICE(),
+//         true // soulbound
+//     );
 
     // assert!(token_dispatcher.is_soulbound(token_id), "Token should be soulbound");
 }
@@ -199,6 +198,127 @@ fn test_get_renderer_no_custom() {
     );
 }
 
+// Test RND-U-05: Reset token renderer
+#[test]
+fn test_reset_token_renderer() {
+    // Deploy token contract
+    let (token_dispatcher, _, _, _) = deploy_optimized_token_custom_metadata(
+        "ResetRenderer", "RR", "",
+    );
+
+    let custom_renderer = contract_address_const::<0x999>();
+
+    // Mint token with custom renderer
+    let token_id = token_dispatcher
+        .mint(
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::Some(custom_renderer),
+            ALICE(),
+            false,
+        );
+
+    // Verify custom renderer is set
+    assert!(token_dispatcher.has_custom_renderer(token_id), "Should have custom renderer");
+    assert!(
+        token_dispatcher.renderer_address(token_id) == custom_renderer,
+        "Renderer should be custom address",
+    );
+
+    // Reset the renderer
+    snforge_std::start_cheat_caller_address(token_dispatcher.contract_address, ALICE());
+    token_dispatcher.reset_token_renderer(token_id);
+    snforge_std::stop_cheat_caller_address(token_dispatcher.contract_address);
+
+    // Verify renderer is reset to zero
+    assert!(
+        !token_dispatcher.has_custom_renderer(token_id),
+        "Should not have custom renderer after reset",
+    );
+    assert!(
+        token_dispatcher.renderer_address(token_id) == contract_address_const::<0x0>(),
+        "Renderer should be zero after reset",
+    );
+}
+
+// Test RND-U-06: Reset token renderer unauthorized
+#[test]
+#[should_panic(expected: "MinigameToken: Caller is not owner of token")]
+fn test_reset_token_renderer_unauthorized() {
+    // Deploy token contract
+    let (token_dispatcher, _, _, _) = deploy_optimized_token_custom_metadata(
+        "ResetUnauthorized", "RU", "",
+    );
+
+    let custom_renderer = contract_address_const::<0x999>();
+
+    // Mint token with custom renderer to ALICE
+    let token_id = token_dispatcher
+        .mint(
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::Some(custom_renderer),
+            ALICE(),
+            false,
+        );
+
+    // Try to reset renderer as BOB (not the owner)
+    snforge_std::start_cheat_caller_address(token_dispatcher.contract_address, BOB());
+    token_dispatcher.reset_token_renderer(token_id); // Should panic
+    snforge_std::stop_cheat_caller_address(token_dispatcher.contract_address);
+}
+
+// Test RND-U-07: Reset token renderer event
+#[test]
+fn test_reset_token_renderer_event() {
+    // Deploy token contract
+    let (token_dispatcher, _, _, _) = deploy_optimized_token_custom_metadata(
+        "ResetRendererEvent", "RRE", "",
+    );
+
+    let custom_renderer = contract_address_const::<0x999>();
+
+    // Mint token with custom renderer
+    let token_id = token_dispatcher
+        .mint(
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::Some(custom_renderer),
+            ALICE(),
+            false,
+        );
+
+    // Reset the renderer
+    snforge_std::start_cheat_caller_address(token_dispatcher.contract_address, ALICE());
+    token_dispatcher.reset_token_renderer(token_id);
+    snforge_std::stop_cheat_caller_address(token_dispatcher.contract_address);
+
+    // Verify renderer was reset
+    assert!(!token_dispatcher.has_custom_renderer(token_id), "Renderer should be reset");
+    assert!(
+        token_dispatcher.renderer_address(token_id) == contract_address_const::<0x0>(),
+        "Renderer address should be zero",
+    );
+}
+
 // Test RND-U-08: Zero address renderer
 #[test]
 fn test_zero_address_renderer() {
@@ -302,7 +422,9 @@ fn test_metadata_update_event() { // This would be tested with update_game when 
 
 #[starknet::contract]
 mod MockSettingsContract {
-    use game_components_minigame::extensions::settings::interface::{IMinigameSettings, IMinigameSettingsDetails};
+    use game_components_minigame::extensions::settings::interface::{
+        IMinigameSettings, IMinigameSettingsDetails,
+    };
     use game_components_minigame::extensions::settings::structs::{GameSettingDetails};
 
     #[storage]

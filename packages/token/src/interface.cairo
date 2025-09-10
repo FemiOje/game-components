@@ -75,6 +75,7 @@ pub trait IMinigameTokenMixin<TState> {
     // Renderer functionality
     fn get_renderer(self: @TState, token_id: u64) -> starknet::ContractAddress;
     fn has_custom_renderer(self: @TState, token_id: u64) -> bool;
+    fn reset_token_renderer(ref self: TState, token_id: u64);
 }
 
 #[starknet::interface]

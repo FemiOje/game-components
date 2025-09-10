@@ -52,7 +52,7 @@ pub mod TicketBoothComponent {
         #[default]
         None,
         Fixed: u64, // set to the exact timestamp
-        Dynamic: u64, // add duration to current time
+        Dynamic: u64 // add duration to current time
     }
 
     #[derive(Drop, Serde, Clone, starknet::Store)]
@@ -158,13 +158,8 @@ pub mod TicketBoothComponent {
             };
 
             // Mint the game token with configured settings
-            let token_id = self.mint_game(
-                player_name,
-                to,
-                soulbound,
-                self.start_time.read(),
-                expiration,
-            );
+            let token_id = self
+                .mint_game(player_name, to, soulbound, self.start_time.read(), expiration);
 
             // Emit the event
             self.emit(GameBought { player: to, token_id, payment_type });

@@ -33,6 +33,7 @@ pub trait IMinigameTokenData<TState> {
 
 #[starknet::interface]
 pub trait IMinigameDetails<TState> {
+    fn token_name(self: @TState, token_id: u64) -> ByteArray;
     fn token_description(self: @TState, token_id: u64) -> ByteArray;
     fn game_details(self: @TState, token_id: u64) -> Span<GameDetail>;
 }

@@ -104,17 +104,17 @@ pub mod MockSettingsContract {
             // Build settings array from storage
             let mut settings_array = array![];
             let count = self.settings_count.read(settings_id);
-            
+
             let mut i: u32 = 0;
             loop {
                 if i >= count {
                     break;
                 }
-                
+
                 let key = self.settings_keys.read((settings_id, i));
                 let value = self.settings_values.read((settings_id, i));
                 settings_array.append(GameSetting { name: key, value: value });
-                
+
                 i += 1;
             };
 
@@ -144,17 +144,17 @@ pub mod MockSettingsContract {
             // Store all settings
             let settings_len = settings.settings.len();
             self.settings_count.write(settings_id, settings_len);
-            
+
             let mut i: u32 = 0;
             loop {
                 if i >= settings_len {
                     break;
                 }
-                
+
                 let setting = settings.settings.at(i);
                 self.settings_keys.write((settings_id, i), setting.name.clone());
                 self.settings_values.write((settings_id, i), setting.value.clone());
-                
+
                 i += 1;
             };
 

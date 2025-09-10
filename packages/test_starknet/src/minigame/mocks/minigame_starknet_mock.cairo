@@ -134,6 +134,9 @@ pub mod minigame_starknet_mock {
 
     #[abi(embed_v0)]
     impl GameDetailsImpl of IMinigameDetails<ContractState> {
+        fn token_name(self: @ContractState, token_id: u64) -> ByteArray {
+            "Test Token"
+        }
         fn token_description(self: @ContractState, token_id: u64) -> ByteArray {
             format!("Test Token Description for token {}", token_id)
         }

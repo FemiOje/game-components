@@ -29,7 +29,9 @@ pub trait IMetagameStarknetMockInit<TContractState> {
 
 #[starknet::contract]
 pub mod metagame_starknet_mock {
-    use game_components_metagame::extensions::context::interface::{IMetagameContext, IMetagameContextDetails};
+    use game_components_metagame::extensions::context::interface::{
+        IMetagameContext, IMetagameContextDetails,
+    };
     use game_components_metagame::metagame::MetagameComponent;
     use game_components_metagame::metagame::MetagameComponent::InternalTrait as MetagameInternalTrait;
     use game_components_metagame::extensions::context::context::ContextComponent;

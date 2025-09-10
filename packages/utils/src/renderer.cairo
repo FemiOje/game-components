@@ -82,10 +82,7 @@ fn create_trait(name: ByteArray, value: ByteArray) -> ByteArray {
 }
 
 pub fn create_default_svg(
-    token_id: u64,
-    game_metadata: GameMetadata,
-    score: u32,
-    player_name: felt252,
+    token_id: u64, game_metadata: GameMetadata, score: u32, player_name: felt252,
 ) -> ByteArray {
     let rect = create_rect(game_metadata.color.clone());
     let logo_element = logo(game_metadata.image);
@@ -96,9 +93,7 @@ pub fn create_default_svg(
     // if player_name.is_non_zero() {
     let mut _player_name = Default::default();
     _player_name
-        .append_word(
-            player_name, U256BytesUsedTraitImpl::bytes_used(player_name.into()).into(),
-        );
+        .append_word(player_name, U256BytesUsedTraitImpl::bytes_used(player_name.into()).into());
     // }
 
     let _token_id = format!("{}", token_id);
@@ -128,6 +123,7 @@ pub fn create_default_svg(
 
 pub fn create_custom_metadata(
     token_id: u64,
+    token_name: ByteArray,
     token_description: ByteArray,
     game_metadata: GameMetadata,
     game_details_image: ByteArray,
@@ -138,7 +134,7 @@ pub fn create_custom_metadata(
     score: u32,
     minted_by: ContractAddress,
     player_name: felt252,
-    objective_ids: Span<u32>
+    objective_ids: Span<u32>,
 ) -> ByteArray {
     let _token_id = format!("{}", token_id);
     let _game_id = format!("{}", token_metadata.game_id);
@@ -146,13 +142,17 @@ pub fn create_custom_metadata(
     let _minted_at = format!("{}", token_metadata.minted_at);
     let _start = format!("{}", token_metadata.lifecycle.start);
     let _end = format!("{}", token_metadata.lifecycle.end);
-    let _expired = if token_metadata.lifecycle.end > 0 { get_block_timestamp() >= token_metadata.lifecycle.end } else { false };
+    let _expired = if token_metadata.lifecycle.end > 0 {
+        get_block_timestamp() >= token_metadata.lifecycle.end
+    } else {
+        false
+    };
     let _settings_id = format!("{}", token_metadata.settings_id);
     let address_as_felt: felt252 = minted_by.into();
     let _minted_by = format!("0x{:x}", address_as_felt);
 
     let mut metadata = JsonImpl::new()
-        .add("name", game_metadata.name.clone() + " #" + _token_id)
+        .add("name", token_name + " #" + _token_id)
         .add("description", token_description)
         .add("image", game_details_image);
 
@@ -166,9 +166,21 @@ pub fn create_custom_metadata(
         create_trait("Minted Time", _minted_at),
         create_trait("Start Time", _start),
         create_trait("End Time", _end),
-        create_trait("Expired", if _expired { "True" } else { "False" }),
-        create_trait("Game Over", if token_metadata.game_over { "True" } else { "False" }),
-        create_trait("Soulbound", if token_metadata.soulbound { "True" } else { "False" }),
+        create_trait("Expired", if _expired {
+            "True"
+        } else {
+            "False"
+        }),
+        create_trait("Game Over", if token_metadata.game_over {
+            "True"
+        } else {
+            "False"
+        }),
+        create_trait("Soulbound", if token_metadata.soulbound {
+            "True"
+        } else {
+            "False"
+        }),
         create_trait("Settings ID", _settings_id),
     ];
 
@@ -185,7 +197,7 @@ pub fn create_custom_metadata(
                 let _context_id = format!("{}", id);
                 attributes.append(create_trait("Context ID", _context_id));
             },
-            Option::None => {}
+            Option::None => {},
         }
     }
 
@@ -204,15 +216,28 @@ pub fn create_custom_metadata(
             i += 1;
         };
         objective_ids_str += "]";
-        
+
         attributes.append(create_trait("Objective IDs", objective_ids_str));
-        attributes.append(create_trait("Objectives Completed", if token_metadata.completed_all_objectives { "True" } else { "False" }));
+        attributes
+            .append(
+                create_trait(
+                    "Objectives Completed",
+                    if token_metadata.completed_all_objectives {
+                        "True"
+                    } else {
+                        "False"
+                    },
+                ),
+            );
     }
 
     // Optional player name trait
     if !player_name.is_zero() {
         let mut _player_name = Default::default();
-            _player_name.append_word(player_name, U256BytesUsedTraitImpl::bytes_used(player_name.into()).into());
+        _player_name
+            .append_word(
+                player_name, U256BytesUsedTraitImpl::bytes_used(player_name.into()).into(),
+            );
         attributes.append(create_trait("Player Name", _player_name));
     }
 
@@ -247,7 +272,9 @@ mod tests {
     #[test]
     fn test_default_svg() {
         let game_metadata = GameMetadata {
-            contract_address: contract_address_const::<0x1234567890123456789012345678901234567890>(),
+            contract_address: contract_address_const::<
+                0x1234567890123456789012345678901234567890,
+            >(),
             name: "zKube",
             description: "A puzzle game on Starknet",
             developer: "zKorp",
@@ -256,15 +283,12 @@ mod tests {
             image: "https://zkube.vercel.app/assets/pwa-512x512.png",
             color: "white",
             client_url: "https://zkube.vercel.app",
-            renderer_address: contract_address_const::<0x9876543210987654321098765432109876543210>(),
+            renderer_address: contract_address_const::<
+                0x9876543210987654321098765432109876543210,
+            >(),
         };
 
-        let svg_result = create_default_svg(
-            1000000,
-            game_metadata,
-            100,
-            'test Player',
-        );
+        let svg_result = create_default_svg(1000000, game_metadata, 100, 'test Player');
 
         println!("Default SVG: {}", svg_result);
     }
@@ -272,7 +296,9 @@ mod tests {
     #[test]
     fn test_custom_metadata_full() {
         let game_metadata = GameMetadata {
-            contract_address: contract_address_const::<0x1234567890123456789012345678901234567890>(),
+            contract_address: contract_address_const::<
+                0x1234567890123456789012345678901234567890,
+            >(),
             name: "zKube",
             description: "A puzzle game on Starknet",
             developer: "zKorp",
@@ -281,7 +307,9 @@ mod tests {
             image: "https://zkube.vercel.app/assets/pwa-512x512.png",
             color: "#4f46e5",
             client_url: "https://zkube.vercel.app",
-            renderer_address: contract_address_const::<0x9876543210987654321098765432109876543210>(),
+            renderer_address: contract_address_const::<
+                0x9876543210987654321098765432109876543210,
+            >(),
         };
 
         let settings_details = GameSettingDetails {
@@ -291,7 +319,8 @@ mod tests {
                 GameSetting { name: "Difficulty", value: "Hard" },
                 GameSetting { name: "Time Limit", value: "300" },
                 GameSetting { name: "Lives", value: "3" },
-            ].span(),
+            ]
+                .span(),
         };
 
         let context_details = GameContextDetails {
@@ -302,7 +331,8 @@ mod tests {
                 GameContext { name: "Tournament", value: "Weekly Challenge #5" },
                 GameContext { name: "Prize Pool", value: "1000 STRK" },
                 GameContext { name: "Participants", value: "156" },
-            ].span(),
+            ]
+                .span(),
         };
 
         let token_metadata = TokenMetadata {
@@ -322,6 +352,7 @@ mod tests {
 
         let metadata = create_custom_metadata(
             1000000,
+            game_metadata.name.clone(),
             "This is a comprehensive test game token with all features",
             game_metadata,
             "https://zkube.vercel.app/assets/token-image.png",
@@ -329,12 +360,15 @@ mod tests {
                 GameDetail { name: "Level", value: "Advanced" },
                 GameDetail { name: "Combo Streak", value: "15" },
                 GameDetail { name: "Special Power", value: "Lightning Bolt" },
-            ].span(),
+            ]
+                .span(),
             settings_details,
             context_details,
             token_metadata,
             95000,
-            contract_address_const::<0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150>(),
+            contract_address_const::<
+                0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150,
+            >(),
             'ProGamer2024',
             objective_ids,
         );
@@ -345,7 +379,9 @@ mod tests {
     #[test]
     fn test_custom_metadata_empty_settings() {
         let game_metadata = GameMetadata {
-            contract_address: contract_address_const::<0x1234567890123456789012345678901234567890>(),
+            contract_address: contract_address_const::<
+                0x1234567890123456789012345678901234567890,
+            >(),
             name: "Simple Game",
             description: "A basic game",
             developer: "Indie Dev",
@@ -354,22 +390,19 @@ mod tests {
             image: "https://example.com/game.png",
             color: "#ffffff",
             client_url: "https://example.com/play",
-            renderer_address: contract_address_const::<0x9876543210987654321098765432109876543210>(),
+            renderer_address: contract_address_const::<
+                0x9876543210987654321098765432109876543210,
+            >(),
         };
 
         // Empty settings
         let settings_details = GameSettingDetails {
-            name: "",
-            description: "",
-            settings: [].span(),
+            name: "", description: "", settings: [].span(),
         };
 
         // Empty context
         let context_details = GameContextDetails {
-            name: "",
-            description: "",
-            id: Option::None,
-            context: [].span(),
+            name: "", description: "", id: Option::None, context: [].span(),
         };
 
         let token_metadata = TokenMetadata {
@@ -387,6 +420,7 @@ mod tests {
 
         let metadata = create_custom_metadata(
             2000000,
+            game_metadata.name.clone(),
             "Basic game token with minimal features",
             game_metadata,
             "https://example.com/basic-token.png",
@@ -395,9 +429,11 @@ mod tests {
             context_details,
             token_metadata,
             1200,
-            contract_address_const::<0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150>(),
+            contract_address_const::<
+                0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150,
+            >(),
             0, // No player name
-            [].span(), // No objectives
+            [].span() // No objectives
         );
 
         println!("Empty settings metadata: {}", metadata);
@@ -406,7 +442,9 @@ mod tests {
     #[test]
     fn test_custom_metadata_partial_context() {
         let game_metadata = GameMetadata {
-            contract_address: contract_address_const::<0x1111111111111111111111111111111111111111>(),
+            contract_address: contract_address_const::<
+                0x1111111111111111111111111111111111111111,
+            >(),
             name: "Context Game",
             description: "Game with partial context",
             developer: "Context Dev",
@@ -415,15 +453,15 @@ mod tests {
             image: "https://example.com/context-game.png",
             color: "#00ff00",
             client_url: "https://example.com/context",
-            renderer_address: contract_address_const::<0x2222222222222222222222222222222222222222>(),
+            renderer_address: contract_address_const::<
+                0x2222222222222222222222222222222222222222,
+            >(),
         };
 
         let settings_details = GameSettingDetails {
             name: "Basic Settings",
             description: "Simple game settings",
-            settings: array![
-                GameSetting { name: "Mode", value: "Single Player" },
-            ].span(),
+            settings: array![GameSetting { name: "Mode", value: "Single Player" }].span(),
         };
 
         // Context with name but no ID
@@ -431,9 +469,7 @@ mod tests {
             name: "Casual Mode",
             description: "Relaxed gameplay mode",
             id: Option::None,
-            context: array![
-                GameContext { name: "Mode Type", value: "Casual" },
-            ].span(),
+            context: array![GameContext { name: "Mode Type", value: "Casual" }].span(),
         };
 
         let token_metadata = TokenMetadata {
@@ -451,17 +487,18 @@ mod tests {
 
         let metadata = create_custom_metadata(
             3000000,
+            game_metadata.name.clone(),
             "Game token with partial context information",
             game_metadata,
             "https://example.com/partial-context.png",
-            array![
-                GameDetail { name: "Progress", value: "50%" },
-            ].span(),
+            array![GameDetail { name: "Progress", value: "50%" }].span(),
             settings_details,
             context_details,
             token_metadata,
             7500,
-            contract_address_const::<0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150>(),
+            contract_address_const::<
+                0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150,
+            >(),
             'CasualPlayer',
             array![10, 20].span(),
         );
@@ -472,7 +509,9 @@ mod tests {
     #[test]
     fn test_custom_metadata_single_objective() {
         let game_metadata = GameMetadata {
-            contract_address: contract_address_const::<0x3333333333333333333333333333333333333333>(),
+            contract_address: contract_address_const::<
+                0x3333333333333333333333333333333333333333,
+            >(),
             name: "Single Objective Game",
             description: "Game with one objective",
             developer: "Solo Dev",
@@ -481,7 +520,9 @@ mod tests {
             image: "https://example.com/adventure.png",
             color: "#ff6600",
             client_url: "https://example.com/adventure",
-            renderer_address: contract_address_const::<0x4444444444444444444444444444444444444444>(),
+            renderer_address: contract_address_const::<
+                0x4444444444444444444444444444444444444444,
+            >(),
         };
 
         let settings_details = GameSettingDetails {
@@ -490,7 +531,8 @@ mod tests {
             settings: array![
                 GameSetting { name: "Difficulty", value: "Medium" },
                 GameSetting { name: "Hints", value: "Enabled" },
-            ].span(),
+            ]
+                .span(),
         };
 
         let context_details = GameContextDetails {
@@ -500,7 +542,8 @@ mod tests {
             context: array![
                 GameContext { name: "Chapter", value: "The Beginning" },
                 GameContext { name: "Location", value: "Mystical Forest" },
-            ].span(),
+            ]
+                .span(),
         };
 
         let token_metadata = TokenMetadata {
@@ -518,6 +561,7 @@ mod tests {
 
         let metadata = create_custom_metadata(
             4000000,
+            game_metadata.name.clone(),
             "Adventure game token with single objective",
             game_metadata,
             "https://example.com/quest-token.png",
@@ -525,14 +569,17 @@ mod tests {
                 GameDetail { name: "Quest Status", value: "In Progress" },
                 GameDetail { name: "Items Collected", value: "5/10" },
                 GameDetail { name: "Experience", value: "2500 XP" },
-            ].span(),
+            ]
+                .span(),
             settings_details,
             context_details,
             token_metadata,
             85000,
-            contract_address_const::<0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150>(),
+            contract_address_const::<
+                0x065d2AB17338b5AffdEbAF95E2D79834B5f30Bac596fF55563c62C3c98700150,
+            >(),
             'AdventureSeeker',
-            array![100].span(), // Single objective
+            array![100].span() // Single objective
         );
 
         println!("Single objective metadata: {}", metadata);
@@ -541,7 +588,9 @@ mod tests {
     #[test]
     fn test_custom_metadata_edge_cases() {
         let game_metadata = GameMetadata {
-            contract_address: contract_address_const::<0x5555555555555555555555555555555555555555>(),
+            contract_address: contract_address_const::<
+                0x5555555555555555555555555555555555555555,
+            >(),
             name: "Edge Case Game",
             description: "Testing edge cases",
             developer: "Test Dev",
@@ -550,7 +599,9 @@ mod tests {
             image: "https://example.com/test.png",
             color: "#000000",
             client_url: "https://example.com/test",
-            renderer_address: contract_address_const::<0x6666666666666666666666666666666666666666>(),
+            renderer_address: contract_address_const::<
+                0x6666666666666666666666666666666666666666,
+            >(),
         };
 
         let settings_details = GameSettingDetails {
@@ -560,7 +611,8 @@ mod tests {
                 GameSetting { name: "Edge Case 1", value: "" }, // Empty value
                 GameSetting { name: "", value: "Edge Case 2" }, // Empty name
                 GameSetting { name: "Normal", value: "Value" },
-            ].span(),
+            ]
+                .span(),
         };
 
         let context_details = GameContextDetails {
@@ -571,7 +623,8 @@ mod tests {
                 GameContext { name: "Max Value", value: "999999999" },
                 GameContext { name: "Special Chars", value: "!@#$%^&*()" },
                 GameContext { name: "ASCII Only", value: "Game Trophy Winner" },
-            ].span(),
+            ]
+                .span(),
         };
 
         let token_metadata = TokenMetadata {
@@ -589,6 +642,7 @@ mod tests {
 
         let metadata = create_custom_metadata(
             18446744073709551615, // Max u64
+            game_metadata.name.clone(),
             "Edge case testing with extreme values and special characters !@#$%^&*()",
             game_metadata,
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
@@ -599,14 +653,15 @@ mod tests {
                 GameDetail { name: "Float-like", value: "3.14159" },
                 GameDetail { name: "Boolean-like", value: "true" },
                 GameDetail { name: "Special Chars", value: "!@#$%^&*()" },
-            ].span(),
+            ]
+                .span(),
             settings_details,
             context_details,
             token_metadata,
             4294967295, // Max u32 score
             contract_address_const::<0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF>(), // Max address
             'MAX_FELT_VALUE_TEST',
-            array![1, 4294967295, 2147483647, 0].span(), // Mix of values including max/min
+            array![1, 4294967295, 2147483647, 0].span() // Mix of values including max/min
         );
 
         println!("Edge cases metadata: {}", metadata);

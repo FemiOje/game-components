@@ -228,8 +228,9 @@ fn test_get_objectives_address() {
 fn test_pre_action_with_owned_token() {
     let test_contracts = setup();
 
-     let owner_address = contract_address_const::<0x1234>(); // Use a fixed address instead of caller
-    let token_id = test_contracts.test_token
+    let owner_address = contract_address_const::<0x1234>(); // Use a fixed address instead of caller
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::Some(test_contracts.minigame.contract_address), // game_address
             Option::None, // player_name
@@ -258,7 +259,8 @@ fn test_pre_action_with_unowned_but_playable_token() {
 
     // Mint a token to a different owner
     let other_owner = contract_address_const::<0x888>();
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::Some(test_contracts.minigame.contract_address),
             Option::None,
@@ -294,7 +296,8 @@ fn test_pre_action_with_expired_token() {
     let past_time: u64 = 100;
     let expired_time: u64 = 200; // Expired in the past
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::Some(test_contracts.minigame.contract_address), // game_address
             Option::None, // player_name

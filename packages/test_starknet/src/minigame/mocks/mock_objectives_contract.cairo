@@ -1,5 +1,6 @@
 use game_components_minigame::extensions::objectives::interface::{
-    IMinigameObjectives, IMinigameObjectivesDetails, IMinigameObjectivesSVG, IMINIGAME_OBJECTIVES_ID,
+    IMinigameObjectives, IMinigameObjectivesDetails, IMinigameObjectivesSVG,
+    IMINIGAME_OBJECTIVES_ID,
 };
 use game_components_minigame::extensions::objectives::structs::GameObjective;
 use starknet::ContractAddress;
@@ -33,7 +34,8 @@ pub trait IObjectivesSetter<TContractState> {
 #[starknet::contract]
 pub mod MockObjectivesContract {
     use game_components_minigame::extensions::objectives::interface::{
-        IMinigameObjectives, IMinigameObjectivesDetails, IMinigameObjectivesSVG, IMINIGAME_OBJECTIVES_ID,
+        IMinigameObjectives, IMinigameObjectivesDetails, IMinigameObjectivesSVG,
+        IMINIGAME_OBJECTIVES_ID,
     };
     use game_components_minigame::extensions::objectives::structs::GameObjective;
     use super::ObjectiveDetails;

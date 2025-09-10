@@ -5,9 +5,7 @@ use openzeppelin_introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrai
 use starknet::{ContractAddress, contract_address_const};
 use core::num::traits::Zero;
 use snforge_std::{declare, ContractClassTrait, DeclareResultTrait, mock_call};
-use game_components_token::examples::minigame_registry_contract::{
-    IMinigameRegistryDispatcherTrait,
-};
+use game_components_token::examples::minigame_registry_contract::{IMinigameRegistryDispatcherTrait};
 use game_components_test_starknet::token::setup::{
     deploy_minigame_registry_contract, deploy_optimized_token_with_registry,
     deploy_optimized_token_default, deploy_optimized_token_with_game, deploy_mock_game,
@@ -193,9 +191,7 @@ fn test_assert_game_registered_fails_unregistered() {
     let unregistered_game = contract_address_const::<0x9999>();
 
     // Call libs::assert_game_registered directly
-    game_components_metagame::libs::assert_game_registered(
-        unregistered_game,
-    );
+    game_components_metagame::libs::assert_game_registered(unregistered_game);
 }
 
 // Test T003.3: assert_game_registered with zero addresses

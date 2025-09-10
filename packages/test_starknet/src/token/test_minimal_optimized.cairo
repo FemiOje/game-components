@@ -13,11 +13,11 @@ use super::setup::{deploy_mock_game, deploy_minimal_optimized_contract, ALICE, B
 fn deploy_minimal_token() -> (IMinigameTokenMixinDispatcher, ERC721ABIDispatcher) {
     let (minigame_dispatcher, _, _) = deploy_mock_game();
     deploy_minimal_optimized_contract(
-        "MinimalToken", 
-        "MIN", 
+        "MinimalToken",
+        "MIN",
         "https://minimal.test/",
-        Option::Some(minigame_dispatcher.contract_address), 
-        Option::Some(minigame_dispatcher.contract_address)
+        Option::Some(minigame_dispatcher.contract_address),
+        Option::Some(minigame_dispatcher.contract_address),
     )
 }
 

@@ -54,7 +54,8 @@ fn test_token_id_monotonicity_fuzz(seed: felt252) {
     while j < 10 {
         let to_address = *addresses.at(j % addresses.len());
 
-        let token_id = test_contracts.test_token
+        let token_id = test_contracts
+            .test_token
             .mint(
                 Option::None,
                 Option::None,
@@ -99,7 +100,8 @@ fn test_lifecycle_validity_fuzz(start_offset: u64, duration: u64) {
     // Set current time
     start_cheat_block_timestamp(test_contracts.test_token.contract_address, current_time);
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -143,7 +145,8 @@ fn test_lifecycle_validity_fuzz(start_offset: u64, duration: u64) {
 fn test_score_monotonicity_fuzz(increment1: u32, increment2: u32, increment3: u32) {
     let test_contracts = setup();
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -193,7 +196,8 @@ fn test_objective_permanence_fuzz(obj_idx1: u32, obj_idx2: u32, obj_idx3: u32) {
     // and just test basic objective tracking
     let obj_ids = array![1, 2, 3];
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -250,7 +254,8 @@ fn test_ownership_protection_fuzz(caller1: felt252, caller2: felt252, caller3: f
     let test_contracts = setup();
 
     let owner = contract_address_const::<0x1>();
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -295,7 +300,8 @@ fn test_settings_immutability_fuzz(settings_id: u32, op1: u8, op2: u8, op3: u8) 
     let test_contracts = setup();
 
     // MockGame doesn't have settings support, so we'll mint without settings
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None, // Use default game address from constructor
             Option::None,
@@ -353,7 +359,8 @@ fn test_objective_completion_one_way_fuzz(seq1: u8, seq2: u8, seq3: u8) {
 
     // MockGame doesn't have create_objective_score
 
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -415,7 +422,8 @@ fn test_token_id_uniqueness_fuzz(mint_count: u8) {
     // Mint multiple tokens
     let mut i: u32 = 0;
     while i < num_mints {
-        let token_id = test_contracts.test_token
+        let token_id = test_contracts
+            .test_token
             .mint(
                 Option::None,
                 Option::None,
@@ -477,7 +485,8 @@ fn test_minter_tracking_consistency_fuzz(mint_count: u8) {
                 test_contracts.test_token.contract_address, minter, CheatSpan::TargetCalls(1),
             );
 
-            let token_id = test_contracts.test_token
+            let token_id = test_contracts
+                .test_token
                 .mint(
                     Option::None,
                     Option::None,
@@ -547,7 +556,8 @@ fn test_soulbound_transfer_block_fuzz(attempt1: felt252, attempt2: felt252, atte
     let owner = contract_address_const::<0x1>();
 
     // Mint soulbound token
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -599,7 +609,8 @@ fn test_mint_nonexistent_settings_fuzz(settings_offset: u32) {
     let settings_id = 1000 + (settings_offset % 1000);
 
     // This should panic as settings don't exist
-    test_contracts.test_token
+    test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -635,7 +646,8 @@ fn test_invalid_lifecycle_fuzz(start: u64, end_offset: u64) {
     };
 
     // This should panic
-    test_contracts.test_token
+    test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -661,7 +673,8 @@ fn test_soulbound_transfer_scenarios_fuzz(scenario: u8) {
     let _other = contract_address_const::<0x2>();
 
     // Mint soulbound token
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,

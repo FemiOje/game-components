@@ -1,7 +1,6 @@
 use game_components_metagame::extensions::context::interface::{
-    IMetagameContextDispatcher, IMetagameContextDispatcherTrait,
-    IMetagameContextDetailsDispatcher, IMetagameContextDetailsDispatcherTrait,
-    IMETAGAME_CONTEXT_ID,
+    IMetagameContextDispatcher, IMetagameContextDispatcherTrait, IMetagameContextDetailsDispatcher,
+    IMetagameContextDetailsDispatcherTrait, IMETAGAME_CONTEXT_ID,
 };
 use game_components_metagame::extensions::context::structs::{GameContextDetails, GameContext};
 use openzeppelin_introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};

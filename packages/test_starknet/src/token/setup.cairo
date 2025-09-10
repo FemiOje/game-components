@@ -235,17 +235,13 @@ pub fn deploy_full_token_contract(
     token_base_uri.serialize(ref constructor_calldata);
 
     let royalty_receiver = match royalty_receiver {
-        Option::Some(addr) => {
-            addr
-        },
-        Option::None => OWNER()
+        Option::Some(addr) => { addr },
+        Option::None => OWNER(),
     };
 
     let royalty_fraction = match royalty_fraction {
-        Option::Some(fraction) => {
-            fraction
-        },
-        Option::None => 0
+        Option::Some(fraction) => { fraction },
+        Option::None => 0,
     };
 
     royalty_receiver.serialize(ref constructor_calldata);
@@ -397,7 +393,13 @@ pub fn deploy_optimized_token_default() -> (
     // Deploy a default registry for multi-game token scenario
     let registry = deploy_minigame_registry_contract();
     deploy_full_token_contract(
-        Option::None, Option::None, Option::None, Option::None, Option::None, Option::Some(registry.contract_address), Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::Some(registry.contract_address),
+        Option::None,
     )
 }
 
@@ -405,7 +407,7 @@ pub fn deploy_optimized_token_default() -> (
 pub fn deploy_optimized_token_with_game(
     game_address: ContractAddress,
 ) -> (IMinigameTokenMixinDispatcher, ERC721ABIDispatcher, ISRC5Dispatcher, ContractAddress) {
-    // For single-game token scenarios, use SingleGameTokenContract which supports 
+    // For single-game token scenarios, use SingleGameTokenContract which supports
     // direct game address without requiring a registry
     deploy_single_game_token_contract(
         Option::None,
@@ -471,8 +473,7 @@ pub fn deploy_optimized_token_custom_metadata(
 
 /// Deploy test token contract with game - wrapper for backward compatibility
 pub fn deploy_test_token_contract_with_game_registry(
-    game_registry_address: Option<ContractAddress>,
-    event_relay_address: Option<ContractAddress>,
+    game_registry_address: Option<ContractAddress>, event_relay_address: Option<ContractAddress>,
 ) -> (IMinigameTokenMixinDispatcher, ERC721ABIDispatcher, ISRC5Dispatcher, ContractAddress) {
     deploy_full_token_contract(
         Option::Some("TestToken"),
@@ -487,8 +488,7 @@ pub fn deploy_test_token_contract_with_game_registry(
 
 /// Deploy single-game test token contract with game address
 pub fn deploy_test_token_contract_with_game(
-    game_address: ContractAddress,
-    event_relay_address: Option<ContractAddress>,
+    game_address: ContractAddress, event_relay_address: Option<ContractAddress>,
 ) -> (IMinigameTokenMixinDispatcher, ERC721ABIDispatcher, ISRC5Dispatcher, ContractAddress) {
     deploy_single_game_token_contract(
         Option::Some("TestToken"),
@@ -517,19 +517,19 @@ pub fn setup() -> TestContracts {
     let (_metagame_dispatcher, metagame_init_dispatcher, metagame_mock_dispatcher) =
         deploy_mock_metagame_contract();
     let minigame_registry_dispatcher = deploy_minigame_registry_contract();
-    
+
     // Use SingleGameTokenContract for single-game tests
     let (test_token_dispatcher, erc721_dispatcher, src5_dispatcher, _) =
         deploy_single_game_token_contract(
-            Option::Some("TestToken"),
-            Option::Some("TT"),
-            Option::Some("https://test.com/token/"),
-            Option::None,
-            Option::None,
-            minigame_dispatcher.contract_address,
-            OWNER(),
-            Option::None,
-        );
+        Option::Some("TestToken"),
+        Option::Some("TT"),
+        Option::Some("https://test.com/token/"),
+        Option::None,
+        Option::None,
+        minigame_dispatcher.contract_address,
+        OWNER(),
+        Option::None,
+    );
 
     // Initialize the minigame mock
     minigame_init_dispatcher
@@ -550,7 +550,9 @@ pub fn setup() -> TestContracts {
         );
 
     // Mock the supports_interface call for the context address
-    mock_call(metagame_init_dispatcher.contract_address, selector!("supports_interface"), true, 100);
+    mock_call(
+        metagame_init_dispatcher.contract_address, selector!("supports_interface"), true, 100,
+    );
 
     metagame_init_dispatcher
         .initializer(
@@ -635,7 +637,7 @@ pub fn setup_multi_game() -> TestContracts {
 pub fn deploy_simple_setup() -> (IMinigameTokenMixinDispatcher, ContractAddress, ContractAddress) {
     // Deploy mock game
     let game_address = deploy_mock_game_standalone();
-    
+
     // Deploy single-game token with the game address
     let (token_dispatcher, _, _, token_address) = deploy_single_game_token_default(game_address);
 
@@ -660,10 +662,10 @@ pub fn deploy_token_with_settings(settings_address: ContractAddress) -> Contract
 
 /// Deploy MinimalOptimizedContract
 pub fn deploy_minimal_optimized_contract(
-    name: ByteArray, 
-    symbol: ByteArray, 
-    base_uri: ByteArray, 
-    game_address: Option<ContractAddress>, 
+    name: ByteArray,
+    symbol: ByteArray,
+    base_uri: ByteArray,
+    game_address: Option<ContractAddress>,
     creator_address: Option<ContractAddress>,
 ) -> (IMinigameTokenMixinDispatcher, ERC721ABIDispatcher) {
     let contract = declare("MinimalOptimizedContract").unwrap().contract_class();

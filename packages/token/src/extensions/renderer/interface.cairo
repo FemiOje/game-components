@@ -5,4 +5,5 @@ pub const IMINIGAME_TOKEN_RENDERER_ID: felt252 =
 pub trait IMinigameTokenRenderer<TState> {
     fn get_renderer(self: @TState, token_id: u64) -> starknet::ContractAddress;
     fn has_custom_renderer(self: @TState, token_id: u64) -> bool;
+    fn reset_token_renderer(ref self: TState, token_id: u64);
 }

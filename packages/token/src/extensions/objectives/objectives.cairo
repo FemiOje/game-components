@@ -63,9 +63,7 @@ pub mod ObjectivesComponent {
 
     #[embeddable_as(ObjectivesImpl)]
     pub impl Objectives<
-        TContractState,
-        +HasComponent<TContractState>, // impl Token: TokenComponent::HasComponent<TContractState>,
-        +Drop<TContractState>,
+        TContractState, +HasComponent<TContractState>, +Drop<TContractState>,
     > of IMinigameTokenObjectives<ComponentState<TContractState>> {
         fn objectives(
             self: @ComponentState<TContractState>, token_id: u64,

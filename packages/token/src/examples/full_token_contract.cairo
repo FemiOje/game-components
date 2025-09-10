@@ -198,6 +198,7 @@ pub mod FullTokenContract {
                 let settings_address = game_dispatcher.settings_address();
 
                 let score_selector = selector!("score");
+                let token_name_selector = selector!("token_name");
                 let token_description_selector = selector!("token_description");
                 let game_details_svg_selector = selector!("game_details_svg");
                 let game_details_selector = selector!("game_details");
@@ -222,6 +223,21 @@ pub mod FullTokenContract {
                     Result::Err(_) => 0,
                 };
 
+                let token_name =
+                    match call_contract_syscall(
+                        renderer_address, token_name_selector, token_calldata.span(),
+                    ) {
+                    Result::Ok(result) => {
+                        // Try to deserialize the result as ByteArray
+                        let mut result_span = result;
+                        match Serde::<ByteArray>::deserialize(ref result_span) {
+                            Option::Some(token_name) => token_name,
+                            Option::None => game_metadata.name.clone(),
+                        }
+                    },
+                    Result::Err(_) => game_metadata.name.clone(),
+                };
+
                 let token_description =
                     match call_contract_syscall(
                         renderer_address, token_description_selector, token_calldata.span(),
@@ -230,7 +246,7 @@ pub mod FullTokenContract {
                         // Try to deserialize the result as ByteArray
                         let mut result_span = result;
                         match Serde::<ByteArray>::deserialize(ref result_span) {
-                            Option::Some(game_details_svg) => game_details_svg,
+                            Option::Some(token_description) => token_description,
                             Option::None => "An NFT representing ownership of an embeddable game.",
                         }
                     },
@@ -247,7 +263,10 @@ pub mod FullTokenContract {
                         match Serde::<ByteArray>::deserialize(ref result_span) {
                             Option::Some(game_details_svg) => game_details_svg,
                             Option::None => create_default_svg(
-                                token_id.try_into().unwrap(), game_metadata.clone(), score, player_name,
+                                token_id.try_into().unwrap(),
+                                game_metadata.clone(),
+                                score,
+                                player_name,
                             ),
                         }
                     },
@@ -320,6 +339,7 @@ pub mod FullTokenContract {
 
                 create_custom_metadata(
                     token_id.try_into().unwrap(),
+                    token_name,
                     token_description,
                     game_metadata,
                     game_details_svg,

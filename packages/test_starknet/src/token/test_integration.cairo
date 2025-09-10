@@ -254,7 +254,8 @@ fn test_time_campaign() {
     start_cheat_block_timestamp(test_contracts.test_token.contract_address, current_time);
 
     // Mint token with future start
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::Some('TimePlayer'),
@@ -270,7 +271,9 @@ fn test_time_campaign() {
         );
 
     // 1. Verify not playable before start
-    assert!(!test_contracts.test_token.is_playable(token_id), "Should not be playable before start");
+    assert!(
+        !test_contracts.test_token.is_playable(token_id), "Should not be playable before start",
+    );
 
     // 2. Move to exactly start time
     start_cheat_block_timestamp(test_contracts.test_token.contract_address, future_start);
@@ -286,7 +289,9 @@ fn test_time_campaign() {
 
     // 5. Verify unplayable after end
     start_cheat_block_timestamp(test_contracts.test_token.contract_address, campaign_end + 1000);
-    assert!(!test_contracts.test_token.is_playable(token_id), "Should not be playable after campaign");
+    assert!(
+        !test_contracts.test_token.is_playable(token_id), "Should not be playable after campaign",
+    );
 
     stop_cheat_block_timestamp(test_contracts.test_token.contract_address);
 }
@@ -311,7 +316,8 @@ fn test_achievement_hunt() {
     };
 
     // Mint token with all objectives
-    let token_id = test_contracts.test_token
+    let token_id = test_contracts
+        .test_token
         .mint(
             Option::Some(test_contracts.minigame.contract_address),
             Option::Some('AchievementHunter'),
@@ -327,9 +333,12 @@ fn test_achievement_hunt() {
         );
 
     // Verify initial state
-    assert!(test_contracts.test_token.objectives_count(token_id) == 10, "Should have 10 objectives");
     assert!(
-        !test_contracts.test_token.all_objectives_completed(token_id), "Objectives should not be completed",
+        test_contracts.test_token.objectives_count(token_id) == 10, "Should have 10 objectives",
+    );
+    assert!(
+        !test_contracts.test_token.all_objectives_completed(token_id),
+        "Objectives should not be completed",
     );
 
     // Complete first 5 objectives
@@ -383,7 +392,8 @@ fn test_double_mint_attack() {
     let test_contracts = setup();
 
     // First mint
-    let token_id_1 = test_contracts.test_token
+    let token_id_1 = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -399,7 +409,8 @@ fn test_double_mint_attack() {
         );
 
     // Second mint - should get different ID
-    let token_id_2 = test_contracts.test_token
+    let token_id_2 = test_contracts
+        .test_token
         .mint(
             Option::None,
             Option::None,
@@ -462,7 +473,9 @@ fn test_access_escalation_attack() {
 
 #[starknet::contract]
 mod MockContextProvider {
-    use game_components_metagame::extensions::context::interface::{IMetagameContext, IMetagameContextDetails};
+    use game_components_metagame::extensions::context::interface::{
+        IMetagameContext, IMetagameContextDetails,
+    };
     use game_components_metagame::extensions::context::structs::{GameContextDetails, GameContext};
 
     #[storage]
