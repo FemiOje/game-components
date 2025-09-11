@@ -270,7 +270,6 @@ pub mod TicketBoothComponent {
         ) {
             // Validate required parameters
             assert!(!game_token_address.is_zero(), "Game token address cannot be zero");
-            assert!(!payment_token.is_zero(), "Payment token cannot be zero");
             assert!(cost_to_play > 0_u128, "Cost to play must be greater than zero");
 
             self.opening_time.write(opening_time);
