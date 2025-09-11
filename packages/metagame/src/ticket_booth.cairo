@@ -270,7 +270,6 @@ pub mod TicketBoothComponent {
         ) {
             // Validate required parameters
             assert!(!game_token_address.is_zero(), "Game token address cannot be zero");
-            assert!(!payment_token.is_zero(), "Payment token cannot be zero");
             assert!(cost_to_play > 0_u128, "Cost to play must be greater than zero");
 
             self.opening_time.write(opening_time);
@@ -316,6 +315,8 @@ pub mod TicketBoothComponent {
             let cost = self.cost_to_play.read();
             let payment_token_address = self.payment_token.read();
             let ticket_receiver_address = self.ticket_receiver_address.read();
+
+            assert!(!payment_token_address.is_zero(), "Payment token cannot be zero address");
 
             // Handle payment (redeem the ticket)
             let payment_token = IERC20Dispatcher { contract_address: payment_token_address };
@@ -438,16 +439,20 @@ pub mod TicketBoothComponent {
         fn update_payment_token_internal(
             ref self: ComponentState<TContractState>, new_payment_token: ContractAddress,
         ) {
-            self.assert_before_opening();
-            assert!(!new_payment_token.is_zero(), "Payment token cannot be zero address");
             self.payment_token.write(new_payment_token);
         }
 
         fn update_ticket_receiver_address_internal(
             ref self: ComponentState<TContractState>, new_ticket_receiver_address: ContractAddress,
         ) {
-            self.assert_before_opening();
             self.ticket_receiver_address.write(new_ticket_receiver_address);
+        }
+        
+        fn update_cost_to_play_internal(
+            ref self: ComponentState<TContractState>, new_cost_to_play: u128,
+        ) {
+            assert!(new_cost_to_play > 0_u128, "Cost to play must be greater than zero");
+            self.cost_to_play.write(new_cost_to_play);
         }
 
         fn update_settings_id_internal(
@@ -457,12 +462,5 @@ pub mod TicketBoothComponent {
             self.settings_id.write(new_settings_id);
         }
 
-        fn update_cost_to_play_internal(
-            ref self: ComponentState<TContractState>, new_cost_to_play: u128,
-        ) {
-            self.assert_before_opening();
-            assert!(new_cost_to_play > 0_u128, "Cost to play must be greater than zero");
-            self.cost_to_play.write(new_cost_to_play);
-        }
     }
 }
