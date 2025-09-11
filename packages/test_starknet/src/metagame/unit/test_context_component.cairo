@@ -323,7 +323,7 @@ fn test_get_context_valid_token() {
     let setter = IContextSetterDispatcher { contract_address };
     setter.store_context(20, context_details);
 
-    let context_dispatcher = IMetagameContextDispatcher { contract_address };
+    let _context_dispatcher = IMetagameContextDispatcher { contract_address };
     let context_details_dispatcher = IMetagameContextDetailsDispatcher { contract_address };
     let retrieved = context_details_dispatcher.context_details(20);
 
@@ -360,7 +360,7 @@ fn test_context_with_empty_array() {
     let setter = IContextSetterDispatcher { contract_address };
     setter.store_context(30, context_details);
 
-    let context_dispatcher = IMetagameContextDispatcher { contract_address };
+    let _context_dispatcher = IMetagameContextDispatcher { contract_address };
     let context_details_dispatcher = IMetagameContextDetailsDispatcher { contract_address };
     let retrieved = context_details_dispatcher.context_details(30);
     assert!(SpanTrait::len(retrieved.context) == 2, "Context array should have mock data");
@@ -393,7 +393,7 @@ fn test_context_with_100_items() {
     let setter = IContextSetterDispatcher { contract_address };
     setter.store_context(40, context_details);
 
-    let context_dispatcher = IMetagameContextDispatcher { contract_address };
+    let _context_dispatcher = IMetagameContextDispatcher { contract_address };
     let context_details_dispatcher = IMetagameContextDetailsDispatcher { contract_address };
     let retrieved = context_details_dispatcher.context_details(40);
     assert!(SpanTrait::len(retrieved.context) == 2, "Should have mock context items");

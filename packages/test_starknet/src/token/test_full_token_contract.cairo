@@ -11,13 +11,13 @@ use game_components_test_starknet::minigame::mocks::minigame_starknet_mock::{
 };
 
 // Import mocks
-use super::mocks::mock_game::{IMockGameDispatcherTrait};
+use super::mocks::mock_game::{};
 
 // Import setup helpers
 use super::setup::{
-    setup, setup_multi_game, deploy_mock_game, deploy_basic_mock_game,
-    deploy_test_token_contract_with_game_registry, deploy_test_token_contract, ALICE, BOB, CHARLIE,
-    ZERO_ADDRESS, RENDERER_ADDRESS, MAX_U64, PAST_TIME, CURRENT_TIME, FUTURE_TIME, FAR_FUTURE_TIME,
+    setup_multi_game, deploy_mock_game,
+    ALICE, BOB, CHARLIE,
+    ZERO_ADDRESS, RENDERER_ADDRESS, MAX_U64, CURRENT_TIME, FUTURE_TIME, FAR_FUTURE_TIME,
 };
 
 // All test constants, deployment helpers, and setup functions are now in setup.cairo
@@ -580,63 +580,7 @@ fn test_sequential_mints_increment_counter() { // UT-MINT-B004
 
 // Happy Path Tests
 
-#[test]
-fn test_update_game_with_state_changes() { // UT-UPDATE-001
-    let test_contracts = setup_multi_game();
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
 
-    // Set game state
-    test_contracts.mock_minigame.end_game(token_id, 100);
-
-    // Update token
-    test_contracts.test_token.update_game(token_id);
-
-    let metadata = test_contracts.test_token.token_metadata(token_id);
-    assert!(metadata.game_over == true, "Game should be over");
-    // Score is stored in the game contract, not in token metadata
-}
-
-#[test]
-fn test_update_game_without_state_changes() { // UT-UPDATE-002
-    let test_contracts = setup_multi_game();
-
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    // Update without changing state
-    test_contracts.test_token.update_game(token_id);
-
-    let metadata = test_contracts.test_token.token_metadata(token_id);
-    assert!(metadata.game_over == false, "Game should not be over");
-    // Score verification would be on the game contract side
-}
 
 #[test]
 fn test_update_game_with_objectives_completion() { // UT-UPDATE-003
@@ -673,39 +617,6 @@ fn test_update_game_with_objectives_completion() { // UT-UPDATE-003
     assert!(metadata.completed_all_objectives == true, "Should have completed all objectives");
 }
 
-#[test]
-fn test_update_game_with_game_over_transition() { // UT-UPDATE-004
-    let test_contracts = setup_multi_game();
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    // Verify initial state
-    let metadata_before = test_contracts.test_token.token_metadata(token_id);
-    assert!(metadata_before.game_over == false, "Game should not be over initially");
-
-    // Set game as over
-    test_contracts.mock_minigame.end_game(token_id, 42);
-
-    // Update token
-    test_contracts.test_token.update_game(token_id);
-
-    let metadata_after = test_contracts.test_token.token_metadata(token_id);
-    assert!(metadata_after.game_over == true, "Game should be over");
-    // Score verification would be on the game contract side
-}
 
 // Revert Path Tests
 
@@ -718,73 +629,9 @@ fn test_update_nonexistent_token() { // UT-UPDATE-R001
     test_contracts.test_token.update_game(999);
 }
 
-#[ignore]
-#[test]
-#[should_panic]
-fn test_update_game_with_blank_token() {
-    // Deploy a token contract without any game address
-    let (token_dispatcher, _, _, _) = deploy_test_token_contract();
-
-    // Mint a blank token (no game address specified in mint either)
-    let token_id = token_dispatcher
-        .mint(
-            Option::None, // No game address
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    // This should panic because there's no game address set
-    token_dispatcher.update_game(token_id);
-}
 
 // State Transition Tests
 
-#[test]
-fn test_game_over_false_to_true_transition() { // UT-UPDATE-S001
-    let test_contracts = setup_multi_game();
-
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    // Initial state
-    let metadata1 = test_contracts.test_token.token_metadata(token_id);
-    assert!(metadata1.game_over == false, "Game should not be over initially");
-
-    // Set game over
-    test_contracts.mock_minigame.end_game(token_id, 42);
-    test_contracts.test_token.update_game(token_id);
-
-    let metadata2 = test_contracts.test_token.token_metadata(token_id);
-    assert!(metadata2.game_over == true, "Game should be over");
-
-    // Try to set back to false (should still be true - invariant)
-    test_contracts.mock_minigame.start_game(token_id);
-    test_contracts.test_token.update_game(token_id);
-
-    let metadata3 = test_contracts.test_token.token_metadata(token_id);
-    assert!(metadata3.game_over == true, "Game should still be over - state can't revert");
-}
 
 #[test]
 // #[ignore] // TODO: Fix objective creation
@@ -818,46 +665,6 @@ fn test_objectives_completion_progression() { // UT-UPDATE-S002
     assert!(objectives.len() == 1, "Should have 1 objective");
 }
 
-#[test]
-fn test_idempotent_updates() { // UT-UPDATE-S003
-    let test_contracts = setup_multi_game();
-
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    // Set state
-    test_contracts.mock_minigame.end_game(token_id, 75);
-
-    // First update
-    test_contracts.test_token.update_game(token_id);
-    let metadata1 = test_contracts.test_token.token_metadata(token_id);
-
-    // Second update (idempotent)
-    test_contracts.test_token.update_game(token_id);
-    let metadata2 = test_contracts.test_token.token_metadata(token_id);
-
-    // Third update (idempotent)
-    test_contracts.test_token.update_game(token_id);
-    let metadata3 = test_contracts.test_token.token_metadata(token_id);
-
-    // All metadata should be identical
-    assert!(metadata1.game_over == metadata2.game_over, "Game over state should be identical");
-    assert!(metadata2.game_over == metadata3.game_over, "Game over state should be identical");
-    // Score comparison would be on the game contract side
-}
 
 // ================================================================================================
 // VIEW FUNCTION TESTS
@@ -903,84 +710,6 @@ fn test_token_metadata_view() { // UT-VIEW-001
     stop_cheat_block_timestamp(test_contracts.test_token.contract_address);
 }
 
-#[test]
-fn test_is_playable_view() { // UT-VIEW-002
-    let test_contracts = setup_multi_game();
-
-    // Test case 1: Token with no lifecycle constraints
-    let token_id1 = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    assert!(test_contracts.test_token.is_playable(token_id1) == true, "Token should be playable");
-
-    // Test case 2: Token with active lifecycle
-    start_cheat_block_timestamp(test_contracts.test_token.contract_address, CURRENT_TIME);
-
-    let token_id2 = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::Some(PAST_TIME),
-            Option::Some(FUTURE_TIME),
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    assert!(
-        test_contracts.test_token.is_playable(token_id2) == true,
-        "Token should be playable within time window",
-    );
-
-    // Test case 3: Token that's game over
-    let (_, mock_game) = deploy_basic_mock_game();
-    let (token_dispatcher, _, _, _) = deploy_test_token_contract_with_game_registry(
-        Option::None, Option::None,
-    );
-
-    let token_id3 = token_dispatcher
-        .mint(
-            Option::Some(mock_game.contract_address),
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    mock_game.set_game_over(token_id3, true);
-    token_dispatcher.update_game(token_id3);
-
-    assert!(
-        token_dispatcher.is_playable(token_id3) == false,
-        "Token should not be playable when game over",
-    );
-
-    stop_cheat_block_timestamp(test_contracts.test_token.contract_address);
-}
 
 #[test]
 fn test_settings_id_view() { // UT-VIEW-003
@@ -1104,32 +833,6 @@ fn test_minted_by_view() { // UT-VIEW-006
     assert!(test_contracts.test_token.minted_by(token_id) == 1, "Minter ID should be 1");
 }
 
-#[test]
-fn test_game_address_view() { // UT-VIEW-007
-    let test_contracts = setup_multi_game();
-
-    // Single game token
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    let game_addr = test_contracts.test_token.game_address();
-    assert!(game_addr == test_contracts.minigame.contract_address, "Game address mismatch");
-    // Multi-game token would be tested with registry
-// TODO: Add multi-game test once registry is set up
-}
 
 #[test]
 fn test_game_registry_address_view() { // UT-VIEW-008

@@ -3,13 +3,9 @@ use snforge_std::{spy_events};
 
 use game_components_token::interface::{IMinigameTokenMixinDispatcherTrait};
 
-// Import extension interfaces
-use game_components_minigame::extensions::settings::interface::{IMinigameSettingsDispatcher};
-
 // Import setup helpers
 use super::setup::{
-    deploy_optimized_token_custom_metadata, deploy_mock_settings_contract,
-    deploy_token_with_settings, ALICE, BOB,
+    deploy_optimized_token_custom_metadata, ALICE, BOB,
 };
 
 // ================================================================================================
@@ -21,21 +17,6 @@ use super::setup::{
 // ================================================================================================
 // TOKEN SETTINGS COMPONENT TESTS
 // ================================================================================================
-
-// Test TST-U-01: Create from authorized
-#[test]
-fn test_settings_create_from_authorized() {
-    // Deploy mock settings contract
-    let settings_address = deploy_mock_settings_contract();
-
-    // Deploy token contract with settings support
-    let _token_address = deploy_token_with_settings(settings_address);
-
-    // Create settings through the settings contract (authorized)
-    let _settings_dispatcher = IMinigameSettingsDispatcher { contract_address: settings_address };
-    // This would normally emit an event - verify no panic
-// In real implementation, settings creation would be done through game contract
-}
 
 // Test TST-U-02: Create from unauthorized
 #[test]
@@ -49,39 +30,6 @@ fn test_settings_create_from_unauthorized() {
 // ================================================================================================
 // TOKEN SOULBOUND COMPONENT TESTS
 // ================================================================================================
-
-// Test SB-U-01: Mint soulbound token
-#[test]
-fn test_mint_soulbound_token() {
-    // Deploy token contract
-    let (token_dispatcher, _, _, _) = deploy_optimized_token_custom_metadata(
-        "SoulboundTest", "SBT", "",
-    );
-    // // Mint soulbound token
-// let token_id = token_dispatcher
-//     .mint(
-//         Option::None,
-//         Option::None,
-//         Option::None,
-//         Option::None,
-//         Option::None,
-//         Option::None,
-//         Option::None,
-//         Option::None,
-//         Option::None,
-//         ALICE(),
-//         true // soulbound
-//     );
-
-    // assert!(token_dispatcher.is_soulbound(token_id), "Token should be soulbound");
-}
-
-// Test SB-U-02: Burn soulbound token
-#[test]
-fn test_burn_soulbound_token() { // Note: Burning functionality would need to be implemented
-// This test verifies that burning is allowed for soulbound tokens
-// while transfers are not
-}
 
 // Test SB-U-03: Transfer soulbound token (should fail)
 #[test]

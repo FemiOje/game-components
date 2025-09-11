@@ -1,8 +1,4 @@
-use game_components_minigame::extensions::settings::interface::{
-    IMinigameSettings, IMinigameSettingsDetails, IMinigameSettingsSVG, IMINIGAME_SETTINGS_ID,
-};
-use game_components_minigame::extensions::settings::structs::{GameSettingDetails, GameSetting};
-use starknet::ContractAddress;
+use game_components_minigame::extensions::settings::structs::{GameSettingDetails};
 
 #[starknet::interface]
 pub trait ISettingsSetter<TContractState> {
@@ -18,8 +14,6 @@ pub mod MockSettingsContract {
     };
     use game_components_minigame::extensions::settings::structs::{GameSettingDetails, GameSetting};
     use openzeppelin_introspection::src5::SRC5Component;
-    use openzeppelin_introspection::interface::ISRC5;
-    use starknet::ContractAddress;
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
 
     component!(path: SRC5Component, storage: src5, event: SRC5Event);

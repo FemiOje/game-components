@@ -5,7 +5,6 @@ use openzeppelin_introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrai
 use starknet::{ContractAddress, contract_address_const};
 use core::num::traits::Zero;
 use snforge_std::{declare, ContractClassTrait, DeclareResultTrait, mock_call};
-use game_components_token::examples::minigame_registry_contract::{IMinigameRegistryDispatcherTrait};
 use game_components_test_starknet::token::setup::{
     deploy_minigame_registry_contract, deploy_optimized_token_with_registry,
     deploy_optimized_token_default, deploy_optimized_token_with_game, deploy_mock_game,
@@ -158,34 +157,12 @@ fn test_context_address_view_when_none() {
     assert!(dispatcher.context_address().is_zero(), "Context address should be zero");
 }
 
-// Test T003.1: assert_game_registered succeeds for registered game
-#[test]
-fn test_assert_game_registered_success() {
-    // This test is about the assert_game_registered library function
-    // We'll use a simpler approach - just check that is_game_registered works
-
-    // Deploy registry contract
-    let registry = deploy_minigame_registry_contract();
-
-    // For this test, we'll manually set a game as registered
-    // by calling the internal storage function (if accessible)
-    // or by using a different approach
-
-    // Instead, let's test the negative case first
-    let unregistered_game = contract_address_const::<0x1234>();
-    assert!(!registry.is_game_registered(unregistered_game), "Game should not be registered");
-    // The positive case requires a proper game registration which needs
-// the caller to implement IMinigame. Since this is a unit test for
-// the metagame component, we'll skip the positive case and rely on
-// integration tests for full flow validation.
-}
-
 // Test T003.2: assert_game_registered reverts for unregistered game
 #[test]
 #[should_panic]
 fn test_assert_game_registered_fails_unregistered() {
     // Deploy registry contract first
-    let registry = deploy_minigame_registry_contract();
+    let _registry = deploy_minigame_registry_contract();
 
     // Try to assert an unregistered game - this should panic
     let unregistered_game = contract_address_const::<0x9999>();
@@ -199,7 +176,7 @@ fn test_assert_game_registered_fails_unregistered() {
 #[should_panic]
 fn test_assert_game_registered_zero_address() {
     // Deploy registry contract first
-    let registry = deploy_minigame_registry_contract();
+    let _registry = deploy_minigame_registry_contract();
 
     // Try to assert with zero game address - this should panic
     let zero_address = contract_address_const::<0x0>();

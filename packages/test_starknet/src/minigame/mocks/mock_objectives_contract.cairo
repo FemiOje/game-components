@@ -1,9 +1,3 @@
-use game_components_minigame::extensions::objectives::interface::{
-    IMinigameObjectives, IMinigameObjectivesDetails, IMinigameObjectivesSVG,
-    IMINIGAME_OBJECTIVES_ID,
-};
-use game_components_minigame::extensions::objectives::structs::GameObjective;
-use starknet::ContractAddress;
 
 // Test-specific struct for objectives with additional fields
 #[derive(Drop, Serde, starknet::Store)]
@@ -40,8 +34,6 @@ pub mod MockObjectivesContract {
     use game_components_minigame::extensions::objectives::structs::GameObjective;
     use super::ObjectiveDetails;
     use openzeppelin_introspection::src5::SRC5Component;
-    use openzeppelin_introspection::interface::ISRC5;
-    use starknet::ContractAddress;
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
 
     component!(path: SRC5Component, storage: src5, event: SRC5Event);

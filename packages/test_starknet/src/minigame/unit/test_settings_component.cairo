@@ -1,13 +1,11 @@
 use game_components_minigame::extensions::settings::interface::{
-    IMinigameSettings, IMinigameSettingsDispatcher, IMinigameSettingsDispatcherTrait,
-    IMinigameSettingsDetails, IMinigameSettingsDetailsDispatcher,
-    IMinigameSettingsDetailsDispatcherTrait, IMinigameSettingsSVG, IMinigameSettingsSVGDispatcher,
+    IMinigameSettingsDispatcher, IMinigameSettingsDispatcherTrait,
+    IMinigameSettingsDetailsDispatcher,
+    IMinigameSettingsDetailsDispatcherTrait, IMinigameSettingsSVGDispatcher,
     IMinigameSettingsSVGDispatcherTrait, IMINIGAME_SETTINGS_ID,
 };
 use game_components_minigame::extensions::settings::structs::{GameSettingDetails, GameSetting};
 use openzeppelin_introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
-use starknet::{contract_address_const, get_caller_address};
-use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
 use game_components_test_starknet::token::setup::deploy_mock_settings_contract;
 use game_components_test_starknet::minigame::mocks::mock_settings_contract::{
     ISettingsSetterDispatcher, ISettingsSetterDispatcherTrait,
@@ -55,7 +53,7 @@ fn test_settings_exist_invalid_id() {
 fn test_get_settings_valid_id() {
     let contract_address = deploy_mock_settings_contract();
 
-    let settings_dispatcher = IMinigameSettingsDispatcher { contract_address };
+    let _settings_dispatcher = IMinigameSettingsDispatcher { contract_address };
     let settings_details_dispatcher = IMinigameSettingsDetailsDispatcher { contract_address };
 
     // Get settings ID 1
@@ -125,7 +123,7 @@ fn test_create_settings_empty_name() {
     let setter = ISettingsSetterDispatcher { contract_address };
     setter.create_test_settings(20, empty_name_settings);
 
-    let settings_dispatcher = IMinigameSettingsDispatcher { contract_address };
+    let _settings_dispatcher = IMinigameSettingsDispatcher { contract_address };
     let settings_details_dispatcher = IMinigameSettingsDetailsDispatcher { contract_address };
     let retrieved = settings_details_dispatcher.settings_details(20);
     assert!(retrieved.name == "", "Name should be empty");
@@ -159,7 +157,7 @@ fn test_create_settings_50_items() {
     let setter = ISettingsSetterDispatcher { contract_address };
     setter.create_test_settings(30, large_settings);
 
-    let settings_dispatcher = IMinigameSettingsDispatcher { contract_address };
+    let _settings_dispatcher = IMinigameSettingsDispatcher { contract_address };
     let settings_details_dispatcher = IMinigameSettingsDetailsDispatcher { contract_address };
     let retrieved = settings_details_dispatcher.settings_details(30);
     assert!(SpanTrait::len(retrieved.settings) == 20, "Should have 20 settings items");

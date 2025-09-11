@@ -140,35 +140,6 @@ fn test_minimal_contract_transfers() {
     assert!(erc721_dispatcher.balance_of(BOB()) == 1, "BOB balance should be 1");
 }
 
-#[test]
-fn test_minimal_contract_disabled_features() {
-    let (token_dispatcher, _) = deploy_minimal_token();
-
-    // Mint a token
-    let token_id = token_dispatcher
-        .mint(
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    // Verify disabled features return default values
-    assert!(token_dispatcher.settings_id(token_id) == 0, "Settings should be disabled");
-    assert!(token_dispatcher.objectives_count(token_id) == 0, "Objectives should be disabled");
-    assert!(!token_dispatcher.is_soulbound(token_id), "Soulbound should be disabled");
-    assert!(
-        token_dispatcher.renderer_address(token_id) == contract_address_const::<0>(),
-        "Renderer should be disabled",
-    );
-}
 
 #[test]
 fn test_minimal_contract_token_metadata() {

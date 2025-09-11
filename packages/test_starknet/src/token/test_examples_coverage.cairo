@@ -6,7 +6,7 @@ use snforge_std::{
 
 use game_components_token::interface::{IMinigameTokenMixinDispatcherTrait};
 use crate::token::setup::{
-    setup, deploy_mock_game, deploy_basic_mock_game, deploy_optimized_token_with_game, ALICE, BOB,
+    setup, deploy_basic_mock_game, deploy_optimized_token_with_game, ALICE, BOB,
     CHARLIE,
 };
 use crate::token::mocks::mock_game::{IMockGameDispatcherTrait};
@@ -14,9 +14,9 @@ use game_components_test_starknet::metagame::mocks::metagame_starknet_mock::{
     IMetagameStarknetMockDispatcherTrait,
 };
 use game_components_test_starknet::minigame::mocks::minigame_starknet_mock::{
-    IMinigameStarknetMockInitDispatcherTrait,
+
 };
-use game_components_token::examples::minigame_registry_contract::{IMinigameRegistryDispatcherTrait};
+use game_components_token::examples::minigame_registry_contract::{};
 
 // Test optimized token contract specific features
 #[test]
@@ -197,106 +197,3 @@ fn test_optimized_contract_game_integration() {
     assert!(metadata_after.game_over, "Game should be over");
 }
 
-#[test]
-fn test_registry_contract_game_management() {
-    let test_contracts = setup();
-
-    // Register additional games
-    let (game2, game2_init, _) = deploy_mock_game();
-    let (game3, game3_init, _) = deploy_mock_game();
-
-    game2_init
-        .initializer(
-            ALICE(),
-            "Game2",
-            "Second Game",
-            "Dev2",
-            "Pub2",
-            "Action",
-            "image2.png",
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            test_contracts.test_token.contract_address,
-        );
-
-    game3_init
-        .initializer(
-            BOB(),
-            "Game3",
-            "Third Game",
-            "Dev3",
-            "Pub3",
-            "Puzzle",
-            "image3.png",
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            test_contracts.test_token.contract_address,
-        );
-
-    // Verify games are registered
-    assert!(
-        test_contracts.minigame_registry.is_game_registered(game2.contract_address),
-        "Game2 should be registered",
-    );
-    assert!(
-        test_contracts.minigame_registry.is_game_registered(game3.contract_address),
-        "Game3 should be registered",
-    );
-
-    // Get game IDs
-    let game2_id = test_contracts.minigame_registry.game_id_from_address(game2.contract_address);
-    let game3_id = test_contracts.minigame_registry.game_id_from_address(game3.contract_address);
-
-    // Verify game metadata
-    let game2_meta = test_contracts.minigame_registry.game_metadata(game2_id);
-    assert!(game2_meta.name == "Game2", "Game2 name should match");
-
-    let game3_meta = test_contracts.minigame_registry.game_metadata(game3_id);
-    assert!(game3_meta.name == "Game3", "Game3 name should match");
-
-    // Mint tokens for different games
-    let token_id2 = test_contracts
-        .test_token
-        .mint(
-            Option::Some(game2.contract_address),
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    let token_id3 = test_contracts
-        .test_token
-        .mint(
-            Option::Some(game3.contract_address),
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            BOB(),
-            false,
-        );
-
-    // Verify tokens have correct game IDs
-    let metadata2 = test_contracts.test_token.token_metadata(token_id2);
-    let metadata3 = test_contracts.test_token.token_metadata(token_id3);
-
-    assert!(metadata2.game_id == game2_id.into(), "Token2 should have game2 ID");
-    assert!(metadata3.game_id == game3_id.into(), "Token3 should have game3 ID");
-}

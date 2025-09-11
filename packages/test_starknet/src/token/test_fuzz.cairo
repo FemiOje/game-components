@@ -3,12 +3,12 @@ use snforge_std::{
     cheat_caller_address, CheatSpan, start_cheat_block_timestamp, stop_cheat_block_timestamp,
 };
 
-use openzeppelin_token::erc721::interface::{ERC721ABIDispatcher, ERC721ABIDispatcherTrait};
+use openzeppelin_token::erc721::interface::{ERC721ABIDispatcherTrait};
 
 use game_components_token::interface::{
-    IMinigameTokenMixinDispatcher, IMinigameTokenMixinDispatcherTrait,
+    IMinigameTokenMixinDispatcherTrait,
 };
-use super::mocks::mock_game::{IMockGameDispatcher, IMockGameDispatcherTrait};
+use super::mocks::mock_game::{};
 use game_components_minigame::interface::{
     IMinigameTokenDataDispatcher, IMinigameTokenDataDispatcherTrait,
 };
@@ -597,34 +597,6 @@ fn test_soulbound_transfer_block_fuzz(attempt1: felt252, attempt2: felt252, atte
 
 // Negative Fuzz Tests
 
-// NF-01: Mint with non-existent settings across range [1000, 2000]
-#[ignore]
-#[test] // Settings validation not enforced in current implementation - validate_settings is a no-op
-#[should_panic]
-#[fuzzer(runs: 10)]
-fn test_mint_nonexistent_settings_fuzz(settings_offset: u32) {
-    let test_contracts = setup();
-
-    // Generate settings ID in range [1000, 2000]
-    let settings_id = 1000 + (settings_offset % 1000);
-
-    // This should panic as settings don't exist
-    test_contracts
-        .test_token
-        .mint(
-            Option::None,
-            Option::None,
-            Option::Some(settings_id),
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            contract_address_const::<0x1>(),
-            false,
-        );
-}
 
 // NF-03: Lifecycle with start > end, random values
 #[test]

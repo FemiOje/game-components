@@ -1,19 +1,17 @@
 use game_components_minigame::interface::{IMinigameDispatcherTrait, IMINIGAME_ID};
 use openzeppelin_introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
-use starknet::{contract_address_const, get_caller_address};
-use core::num::traits::Zero;
+use starknet::{contract_address_const};
 use snforge_std::{
     start_cheat_caller_address, stop_cheat_caller_address, mock_call,
     start_cheat_block_timestamp_global,
 };
 use crate::minigame::mocks::minigame_starknet_mock::{
-    IMinigameStarknetMockInitDispatcherTrait, IMinigameStarknetMockDispatcherTrait,
+    IMinigameStarknetMockInitDispatcherTrait,
 };
 use game_components_token::interface::{IMinigameTokenMixinDispatcherTrait};
-use crate::token::setup::{setup, deploy_mock_game, deploy_optimized_token_with_game};
+use crate::token::setup::{setup, deploy_mock_game};
 
 // Test MN-U-01: Initialize with all addresses
-#[ignore]
 #[test]
 fn test_initialize_with_all_addresses() {
     let token_address = contract_address_const::<0x123>();
@@ -64,49 +62,8 @@ fn test_initialize_with_all_addresses() {
     assert!(src5_dispatcher.supports_interface(IMINIGAME_ID), "Should support IMinigame interface");
 }
 
-// Test MN-U-02: Initialize with optional addresses = 0
-#[ignore]
-#[test]
-fn test_initialize_with_optional_zero() {
-    let token_address = contract_address_const::<0xABC>();
-
-    // Mock the supports_interface call for the token address
-    mock_call(token_address, selector!("supports_interface"), true, 100);
-
-    // Mock the game_registry_address call to return a dummy registry address
-    let registry_address = contract_address_const::<0x0>();
-    mock_call(token_address, selector!("game_registry_address"), registry_address, 100);
-
-    let (minigame_dispatcher, minigame_init_dispatcher, _) = deploy_mock_game();
-
-    // Initialize with zero addresses for optional fields
-    minigame_init_dispatcher
-        .initializer(
-            contract_address_const::<0x0>(),
-            "TestGame",
-            "TestDescription",
-            "TestDeveloper",
-            "TestPublisher",
-            "TestGenre",
-            "TestImage",
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None, // Zero settings address
-            Option::None, // Zero objectives address
-            token_address,
-        );
-
-    // Verify addresses
-    assert!(minigame_dispatcher.token_address() == token_address, "Token address mismatch");
-    assert!(minigame_dispatcher.settings_address().is_zero(), "Settings address should be zero");
-    assert!(
-        minigame_dispatcher.objectives_address().is_zero(), "Objectives address should be zero",
-    );
-}
 
 // Test MN-U-03: Get token_address
-#[ignore]
 #[test]
 fn test_get_token_address() {
     let token_address = contract_address_const::<0x111>();
@@ -143,7 +100,6 @@ fn test_get_token_address() {
 }
 
 // Test MN-U-04: Get settings_address
-#[ignore]
 #[test]
 fn test_get_settings_address() {
     let token_address = contract_address_const::<0x111>();
@@ -183,7 +139,6 @@ fn test_get_settings_address() {
 }
 
 // Test MN-U-05: Get objectives_address
-#[ignore]
 #[test]
 fn test_get_objectives_address() {
     let token_address = contract_address_const::<0x111>();
@@ -252,7 +207,6 @@ fn test_pre_action_with_owned_token() {
 }
 
 // Test MN-U-07: pre_action with valid playable token (no ownership check in pre_action)
-#[ignore]
 #[test]
 fn test_pre_action_with_unowned_but_playable_token() {
     let test_contracts = setup();

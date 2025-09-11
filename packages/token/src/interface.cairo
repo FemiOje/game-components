@@ -48,6 +48,7 @@ pub trait IMinigameTokenMixin<TState> {
         context: Option<GameContextDetails>,
     );
     fn update_game(ref self: TState, token_id: u64);
+    fn update_player_name(ref self: TState, token_id: u64, name: felt252);
     // Minter functionality
     fn get_minter_address(self: @TState, minter_id: u64) -> starknet::ContractAddress;
     fn get_minter_id(self: @TState, minter_address: starknet::ContractAddress) -> u64;

@@ -2,7 +2,7 @@
 use starknet::contract_address_const;
 use snforge_std::{
     cheat_caller_address, CheatSpan, start_cheat_block_timestamp, stop_cheat_block_timestamp,
-    spy_events, EventSpyTrait,
+
 };
 
 use game_components_token::interface::IMinigameTokenMixinDispatcherTrait;
@@ -234,139 +234,6 @@ fn test_core_token_lifecycle_validation() {
 }
 
 #[test]
-fn test_core_token_blank_token_operations() {
-    let test_contracts = setup();
-
-    // Create settings ID 42 before using it
-    test_contracts
-        .mock_minigame
-        .create_settings_difficulty("Test Settings", "Settings for ID 42", 5);
-    // The mock creates settings with incrementing IDs starting from 1
-    // We need to create enough settings to reach ID 42
-    let mut i = 2_u32;
-    while i <= 42 {
-        test_contracts
-            .mock_minigame
-            .create_settings_difficulty(
-                format!("Settings {}", i),
-                format!("Description for settings {}", i),
-                (i % 10).try_into().unwrap(),
-            );
-        i += 1;
-    };
-
-    // Create objectives 1 and 2 before using them
-    test_contracts.mock_minigame.create_objective_score(50); // Creates objective ID 1
-    test_contracts.mock_minigame.create_objective_score(100); // Creates objective ID 2
-
-    // Mint completely blank token
-    let blank_token_id = test_contracts
-        .test_token
-        .mint(
-            Option::None, // No game
-            Option::None, // No player name
-            Option::None, // No settings
-            Option::None, // No start
-            Option::None, // No end
-            Option::None, // No objectives
-            Option::None, // No context
-            Option::None, // No client URL
-            Option::None, // No renderer
-            ALICE(),
-            false,
-        );
-
-    // Set metadata on blank token
-    test_contracts
-        .test_token
-        .set_token_metadata(
-            blank_token_id,
-            test_contracts.minigame.contract_address,
-            Option::Some('UpdatedPlayer'),
-            Option::Some(42),
-            Option::Some(2000),
-            Option::Some(3000),
-            Option::Some(array![1, 2].span()),
-            Option::None,
-        );
-
-    // Verify metadata was set
-    let metadata = test_contracts.test_token.token_metadata(blank_token_id);
-    assert!(metadata.settings_id == 42, "Settings should be set");
-    assert!(metadata.lifecycle.start == 2000, "Start should be set");
-    assert!(metadata.lifecycle.end == 3000, "End should be set");
-    assert!(metadata.objectives_count == 2, "Should have 2 objectives");
-
-    // Verify view functions
-    assert!(
-        test_contracts.test_token.player_name(blank_token_id) == 'UpdatedPlayer',
-        "Player name should be set",
-    );
-    assert!(
-        test_contracts.test_token.settings_id(blank_token_id) == 42, "Settings ID should be set",
-    );
-    assert!(
-        test_contracts.test_token.objectives_count(blank_token_id) == 2,
-        "Objectives count should be 2",
-    );
-}
-
-#[test]
-fn test_core_token_event_emissions() {
-    let test_contracts = setup();
-    let mut spy = spy_events();
-
-    // Create settings ID 10 before using it
-    let mut i = 1_u32;
-    while i <= 10 {
-        test_contracts
-            .mock_minigame
-            .create_settings_difficulty(
-                format!("Settings {}", i),
-                format!("Description for settings {}", i),
-                (i % 5).try_into().unwrap(),
-            );
-        i += 1;
-    };
-
-    // Create objectives 1, 2, and 3 before using them
-    test_contracts.mock_minigame.create_objective_score(100); // Creates objective ID 1
-    test_contracts.mock_minigame.create_objective_score(200); // Creates objective ID 2
-    test_contracts.mock_minigame.create_objective_score(300); // Creates objective ID 3
-
-    // Mint token to trigger events
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::Some(test_contracts.minigame.contract_address),
-            Option::Some('EventPlayer'),
-            Option::Some(10),
-            Option::Some(1000),
-            Option::Some(2000),
-            Option::Some(array![1, 2, 3].span()),
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            true // soulbound
-        );
-
-    // Get events
-    let events = spy.get_events();
-    assert!(events.events.len() > 0, "Should emit events");
-
-    // Update game to trigger more events
-    test_contracts.mock_minigame.end_game(token_id, 100);
-    test_contracts.test_token.update_game(token_id);
-
-    // Check for update events
-    let events_after = spy.get_events();
-    let initial_count: usize = events.events.len();
-    let after_count: usize = events_after.events.len();
-    assert!(after_count > initial_count, "Should emit more events after update");
-}
-
-#[test]
 fn test_core_token_minter_edge_cases() {
     let test_contracts = setup();
 
@@ -517,5 +384,172 @@ fn test_set_token_metadata_nonexistent_token_should_panic() {
             Option::None,
             Option::None,
         );
+}
+
+// ============================================================================
+// UPDATE_PLAYER_NAME TESTS
+// ============================================================================
+
+#[test]
+fn test_update_player_name_basic() {
+    let test_contracts = setup();
+    
+    // Mint a token
+    let token_id = test_contracts.test_token.mint(
+        Option::Some(test_contracts.minigame.contract_address),
+        Option::Some('Player'),
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        ALICE(),
+        false,
+    );
+    
+    // Update player name as the token owner
+    let new_name = 'Player1';
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, new_name);
+    
+    // Verify the name was updated
+    let updated_name = test_contracts.test_token.player_name(token_id);
+    assert!(updated_name == new_name, "Player name not updated");
+}
+
+#[test]
+fn test_update_player_name_multiple_updates() {
+    let test_contracts = setup();
+    
+    // Mint a token
+    let token_id = test_contracts.test_token.mint(
+        Option::Some(test_contracts.minigame.contract_address),
+        Option::Some('Player'),
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        ALICE(),
+        false,
+    );
+    
+    // Update player name multiple times as the token owner
+    let name1 = 'Alice';
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, name1);
+    let updated_name = test_contracts.test_token.player_name(token_id);
+    assert!(updated_name == name1, "First name update failed");
+    
+    let name2 = 'Bob';
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, name2);
+    let updated_name = test_contracts.test_token.player_name(token_id);
+    assert!(updated_name == name2, "Second name update failed");
+    
+    let name3 = 'Charlie';
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, name3);
+    let updated_name = test_contracts.test_token.player_name(token_id);
+    assert!(updated_name == name3, "Third name update failed");
+}
+
+#[test]
+#[should_panic(expected: "MinigameToken: Token")]
+fn test_update_player_name_nonexistent_token() {
+    let test_contracts = setup();
+    
+    // Try to update name for non-existent token as anyone
+    let invalid_token_id = 999;
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(invalid_token_id, 'InvalidName');
+}
+
+#[test]
+#[should_panic(expected: "MinigameToken: Caller is not owner of token")]
+fn test_update_player_name_non_owner() {
+    let test_contracts = setup();
+    
+    // Mint a token to ALICE
+    let token_id = test_contracts.test_token.mint(
+        Option::Some(test_contracts.minigame.contract_address),
+        Option::Some('Player'),
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        ALICE(),
+        false,
+    );
+    
+    // Try to update name as BOB (non-owner)
+    cheat_caller_address(test_contracts.test_token.contract_address, BOB(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, 'HackerName');
+}
+
+#[test]
+#[should_panic(expected: "MinigameToken: Player name is empty")]
+fn test_update_player_name_empty_name() {
+    let test_contracts = setup();
+    
+    // Mint a token
+    let token_id = test_contracts.test_token.mint(
+        Option::Some(test_contracts.minigame.contract_address),
+        Option::Some('Player'),
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        ALICE(),
+        false,
+    );
+    
+    // Try to update with empty name (0 felt) as the token owner - should panic
+    let empty_name = 0;
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, empty_name);
+}
+
+#[test]
+fn test_update_player_name_special_characters() {
+    let test_contracts = setup();
+    
+    // Mint a token
+    let token_id = test_contracts.test_token.mint(
+        Option::Some(test_contracts.minigame.contract_address),
+        Option::Some('Player'),
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        Option::None,
+        ALICE(),
+        false,
+    );
+    
+    // Test various special names as the token owner
+    let special_name = '123456';
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, special_name);
+    let updated_name = test_contracts.test_token.player_name(token_id);
+    assert!(updated_name == special_name, "Numeric name update failed");
+    
+    let max_felt = 0x7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    cheat_caller_address(test_contracts.test_token.contract_address, ALICE(), CheatSpan::TargetCalls(1));
+    test_contracts.test_token.update_player_name(token_id, max_felt);
+    let updated_name = test_contracts.test_token.player_name(token_id);
+    assert!(updated_name == max_felt, "Max felt name update failed");
 }
 

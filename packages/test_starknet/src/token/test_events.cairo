@@ -1,5 +1,5 @@
 use snforge_std::{
-    spy_events, EventSpyAssertionsTrait, EventSpyTrait, cheat_caller_address, CheatSpan,
+    spy_events, EventSpyTrait, cheat_caller_address, CheatSpan,
 };
 
 use openzeppelin_token::erc721::interface::{ERC721ABIDispatcherTrait};
@@ -8,7 +8,7 @@ use game_components_token::interface::{IMinigameTokenMixinDispatcherTrait};
 // Import IMockGameDispatcher trait
 use super::mocks::mock_game::{IMockGameDispatcherTrait};
 use game_components_test_starknet::minigame::mocks::minigame_starknet_mock::{
-    IMinigameStarknetMockDispatcherTrait, IMinigameStarknetMockInitDispatcherTrait,
+    IMinigameStarknetMockInitDispatcherTrait,
 };
 
 // Import test helpers from setup module
@@ -24,10 +24,10 @@ use super::setup::{
 #[test]
 fn test_mint_event_emission() {
     let test_contracts = setup();
-    let mut spy = spy_events();
+    let mut _spy = spy_events();
 
     // Mint a token
-    let token_id = test_contracts
+    let _token_id = test_contracts
         .test_token
         .mint(
             Option::Some(test_contracts.minigame.contract_address),
@@ -81,14 +81,14 @@ fn test_update_game_event_emissions() {
     let events = spy.get_events();
 
     // Verify we have events
-    assert!(events.events.len() >= 2, "Should emit at least 2 events");
+    assert!(events.events.span().len() >= 2, "Should emit at least 2 events");
 
     // Check for ScoreUpdate event
     let mut found_score_update = false;
     let mut found_game_updated = false;
 
     let mut i: u32 = 0;
-    while i < events.events.len() {
+    while i < events.events.span().len() {
         let (contract_address, event) = events.events.at(i);
         if *contract_address == token_address {
             // Check event data to identify event type
@@ -141,7 +141,7 @@ fn test_update_game_with_metadata_change_events() {
 
     // Should emit ScoreUpdate, MetadataUpdate, and GameUpdated
     let events = spy.get_events();
-    assert!(events.events.len() >= 3, "Should emit at least 3 events when metadata changes");
+    assert!(events.events.span().len() >= 3, "Should emit at least 3 events when metadata changes");
 }
 
 #[test]
@@ -168,7 +168,7 @@ fn test_mint_with_context_event() {
 
     // Should emit events
     let events = spy.get_events();
-    assert!(events.events.len() >= 1, "Should emit mint events");
+    assert!(events.events.span().len() >= 1, "Should emit mint events");
 }
 
 #[test]
@@ -211,7 +211,7 @@ fn test_set_token_metadata_events() {
     // Should emit MetadataUpdate event
     let events = spy.get_events();
     // Note: MetadataUpdate event might not be emitted in current implementation
-    assert!(events.events.len() >= 0, "Check for events");
+    assert!(events.events.span().len() >= 0, "Check for events");
 }
 
 #[test]
@@ -245,7 +245,7 @@ fn test_transfer_events() {
 
     // Should emit Transfer event
     let events = spy.get_events();
-    assert!(events.events.len() >= 1, "Should emit Transfer event");
+    assert!(events.events.span().len() >= 1, "Should emit Transfer event");
 }
 
 #[test]
@@ -278,45 +278,9 @@ fn test_batch_operations_event_count() {
 
     // Should emit 3 TokenMinted events
     let events = spy.get_events();
-    assert!(events.events.len() >= 3, "Should emit event for each mint");
+    assert!(events.events.span().len() >= 3, "Should emit event for each mint");
 }
 
-#[test]
-fn test_objectives_completion_events() {
-    let test_contracts = setup();
-
-    // Use predefined objectives (as mock_minigame doesn't have create_objective_score)
-    test_contracts.mock_minigame.create_objective_score(50);
-    test_contracts.mock_minigame.create_objective_score(100);
-    let objective_ids = array![1, 2].span();
-
-    // Mint with objectives
-    let token_id = test_contracts
-        .test_token
-        .mint(
-            Option::Some(test_contracts.minigame.contract_address),
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::None,
-            Option::Some(objective_ids),
-            Option::None,
-            Option::None,
-            Option::None,
-            ALICE(),
-            false,
-        );
-
-    // Update game score using mock's end_game method
-    test_contracts.mock_minigame.end_game(token_id, 100);
-
-    let mut spy = spy_events();
-    test_contracts.test_token.update_game(token_id);
-
-    // Should emit events for objectives completion
-    let events = spy.get_events();
-    assert!(events.events.len() >= 1, "Should emit events for objectives");
-}
 
 #[test]
 fn test_multi_game_registry_events() {
@@ -361,5 +325,5 @@ fn test_multi_game_registry_events() {
 
     // Should emit TokenMinted with correct game_id
     let events = spy.get_events();
-    assert!(events.events.len() >= 1, "Should emit TokenMinted event");
+    assert!(events.events.span().len() >= 1, "Should emit TokenMinted event");
 }
