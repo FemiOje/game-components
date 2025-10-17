@@ -2,10 +2,13 @@
 name = "game_components_token"
 version = "1.5.1"
 edition = "2024_07"
-cairo-version = "=2.10.1"
+
+
+[cairo]
+sierra-replace-ids = true
 
 [dependencies]
-starknet = "2.10.1"
+starknet.workspace = true
 openzeppelin_token = "1.0.0"
 openzeppelin_introspection = "1.0.0"
 # Game components dependencies
@@ -17,8 +20,8 @@ game_components_test_starknet = { path = "../test_starknet" }
 [scripts]
 test = "snforge test"
 
+[lib]
+
 [[target.starknet-contract]]
 sierra = true
-
-
-[lib]
+casm = true

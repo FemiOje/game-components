@@ -1,0 +1,5 @@
+Contract Address: 0x5a499a49f635d0a9379da557b3f13aeb74a1b2295944755575e6adb2b86f7dd
+Transaction Hash: 0x002fe8be6d2c06475e478ed2b85f5730f346aa91df5be15cdf460a425522bfbd
+Class Hash: 0x075137b5c45312610d7cb6d43982e5fd5bd0df6c0b1e51518ced64a91f125e85
+Name: DopewarsGameToken
+Symbol: DGT

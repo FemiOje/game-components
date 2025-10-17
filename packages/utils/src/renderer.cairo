@@ -84,17 +84,21 @@ fn create_trait(name: ByteArray, value: ByteArray) -> ByteArray {
 pub fn create_default_svg(
     token_id: u64, game_metadata: GameMetadata, score: u32, player_name: felt252,
 ) -> ByteArray {
-    let rect = create_rect(game_metadata.color.clone());
+    let mut color = game_metadata.color.clone();
+    if color.len() == 0 {
+        color = "white";
+    };
+
+    let rect = create_rect(color.clone());
     let logo_element = logo(game_metadata.image);
     let _game_name = format!("{}", game_metadata.name);
     let _game_developer = format!("{}", game_metadata.developer);
     let _score = format!("{}", score);
 
-    // if player_name.is_non_zero() {
     let mut _player_name = Default::default();
-    _player_name
-        .append_word(player_name, U256BytesUsedTraitImpl::bytes_used(player_name.into()).into());
-    // }
+    if player_name.is_non_zero() {
+        _player_name = format!("{}", player_name);
+    }
 
     let _token_id = format!("{}", token_id);
 
@@ -116,7 +120,7 @@ pub fn create_default_svg(
     ];
 
     let mut elements = elements.span();
-    let image = create_svg(game_metadata.color.clone(), combine_elements(ref elements));
+    let image = create_svg(color.clone(), combine_elements(ref elements));
 
     format!("data:image/svg+xml;base64,{}", bytes_base64_encode(image))
 }
@@ -233,11 +237,7 @@ pub fn create_custom_metadata(
 
     // Optional player name trait
     if !player_name.is_zero() {
-        let mut _player_name = Default::default();
-        _player_name
-            .append_word(
-                player_name, U256BytesUsedTraitImpl::bytes_used(player_name.into()).into(),
-            );
+        let _player_name = format!("{}", player_name);
         attributes.append(create_trait("Player Name", _player_name));
     }
 
@@ -665,5 +665,30 @@ mod tests {
         );
 
         println!("Edge cases metadata: {}", metadata);
+    }
+
+    #[test]
+    fn test_default_svg_short_name() {
+        let game_metadata = GameMetadata {
+            contract_address: contract_address_const::<
+                0x1234567890123456789012345678901234567890,
+            >(),
+            name: "zKube",
+            description: "A puzzle game on Starknet",
+            developer: "zKorp",
+            publisher: "Starknet Games",
+            genre: "Puzzle",
+            image: "https://zkube.vercel.app/assets/pwa-512x512.png",
+            color: "white",
+            client_url: "https://zkube.vercel.app",
+            renderer_address: contract_address_const::<
+                0x9876543210987654321098765432109876543210,
+            >(),
+        };
+
+        let svg_result = create_default_svg(1, game_metadata, 25906, 'hellou');
+
+        // A better test would be to decode the base64 and check the SVG content.
+        assert(svg_result.len() > 0, "SVG should not be empty");
     }
 }

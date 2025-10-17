@@ -290,26 +290,30 @@ pub mod FullTokenContract {
                     Result::Err(_) => array![].span(),
                 };
 
-                let mut settings_calldata = array![];
-                settings_calldata.append(token_metadata.settings_id.into());
+                // Check if settings_address is zero before attempting contract call
+                let settings_details = if settings_address.is_zero() {
+                    GameSettingDetails { name: "", description: "", settings: array![].span() }
+                } else {
+                    let mut settings_calldata = array![];
+                    settings_calldata.append(token_metadata.settings_id.into());
 
-                let settings_details =
                     match call_contract_syscall(
                         settings_address, settings_details_selector, settings_calldata.span(),
                     ) {
-                    Result::Ok(result) => {
-                        // Try to deserialize the result as GameSettingDetails
-                        let mut result_span = result;
-                        match Serde::<GameSettingDetails>::deserialize(ref result_span) {
-                            Option::Some(settings_details) => settings_details,
-                            Option::None => GameSettingDetails {
-                                name: "", description: "", settings: array![].span(),
-                            },
-                        }
-                    },
-                    Result::Err(_) => GameSettingDetails {
-                        name: "", description: "", settings: array![].span(),
-                    },
+                        Result::Ok(result) => {
+                            // Try to deserialize the result as GameSettingDetails
+                            let mut result_span = result;
+                            match Serde::<GameSettingDetails>::deserialize(ref result_span) {
+                                Option::Some(settings_details) => settings_details,
+                                Option::None => GameSettingDetails {
+                                    name: "", description: "", settings: array![].span(),
+                                },
+                            }
+                        },
+                        Result::Err(_) => GameSettingDetails {
+                            name: "", description: "", settings: array![].span(),
+                        },
+                    }
                 };
 
                 let minted_by_address = self.minter.get_minter_address(token_metadata.minted_by);
